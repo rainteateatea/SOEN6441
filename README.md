@@ -1,1 +1,1 @@
-# SOEN6441
+This is SOEN6441 Project 3
