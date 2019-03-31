@@ -95,7 +95,7 @@ public class LoadMap extends JFrame implements Observer {
 				}
 			});
 
-			File image = new File("resource/country.png");
+			File image = new File("resource/hexagon.png");
 
 			for (String key : countries.keySet()) {
 

@@ -136,7 +136,7 @@ public class PlayView extends JFrame implements Observer {
 			observable.setPlayerSet(playerSet);
 			dominationView = new DominationView(observable);
 			observable.addObserver(dominationView);
-			File image = new File("resource/tower.png");
+			File image = new File("resource/hexagon.png");
 
 			for (String key : countries.keySet()) {
 

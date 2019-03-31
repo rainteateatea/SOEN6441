@@ -5,6 +5,7 @@ import java.util.HashMap;
 import Model.Checkmap;
 import Model.Continent;
 import Model.Country;
+import Model.IO;
 import View.EditMap;
 /**
  *<h1>EditMap_contrallor</h1>
@@ -29,6 +30,7 @@ public class EditMap_controllor extends Object{
 	
 	/**
 	 * It invoke IO class.
+	 * 
 	 * @param Countries country.
 	 * @param continents continent.
 	 */

@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Observable;
@@ -26,9 +27,11 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import Model.Card;
 import Model.Continent;
 import Model.Country;
 import Model.InitializePhase;
+import Model.Message;
 import Model.Player;
 import View.PlayView;
 
@@ -403,5 +406,71 @@ public class BackEnd implements Observer {
 		}
 
 		return canAttack;
+	}
+	
+	
+	public String changeCards(Player curPlayer) {
+		
+		int armies = 0;
+		LinkedList<Card> newlist = new LinkedList<Card>();
+		LinkedList<Card> i = new LinkedList<Card>();
+		LinkedList<Card> c = new LinkedList<Card>();
+		LinkedList<Card> a = new LinkedList<Card>();
+		
+		for(Card card : curPlayer.getCardList()) {
+			if (card.getName().equals(i)) {
+				i.add(card);
+			} else if (card.getName().equals(a)) {
+				a.add(card);
+			} else {
+				c.add(card);
+			}
+		}
+		
+		if (i.size() >= 3) {
+			for (int j = 0; j < 3; j++) {
+				i.pollFirst();
+			}
+			
+			armies = armies + curPlayer.getChangeCardTime()*5;
+			curPlayer.setChangeCardTime(curPlayer.getChangeCardTime() + 1);
+		} else if (c.size()>= 3) {
+			for (int j = 0; j < 3; j++) {
+				c.pollFirst();
+			}
+			
+			armies = armies + curPlayer.getChangeCardTime()*5;
+			curPlayer.setChangeCardTime(curPlayer.getChangeCardTime() + 1);
+		} else {
+			for (int j = 0; j < 3; j++) {
+				a.pollFirst();
+			}
+			
+			armies = armies + curPlayer.getChangeCardTime()*5;
+			curPlayer.setChangeCardTime(curPlayer.getChangeCardTime() + 1);
+		}
+		
+		if (i.size()!= 0 && a.size() != 0 && c.size() != 0) {
+			i.pollFirst();
+			a.pollFirst();
+			c.pollFirst();
+			armies = armies + curPlayer.getChangeCardTime()*5;
+			curPlayer.setChangeCardTime(curPlayer.getChangeCardTime() + 1);
+		}
+		
+		String result = toString().valueOf(armies);
+		
+		newlist.addAll(i);
+		newlist.addAll(a);
+		newlist.addAll(c);
+		curPlayer.setCardList(newlist);
+		
+		if (i.size()>=3 || a.size() >=3 ||  c.size() >=3 || (i.size()!= 0 && a.size() != 0 && c.size() != 0)) {
+			result = result + " " + "1";
+			return result;
+		}
+		
+		result = result + " " + "0";
+		return result;
 	}
 }

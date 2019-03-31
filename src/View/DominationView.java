@@ -4,6 +4,7 @@ import Model.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -76,7 +77,7 @@ public class DominationView extends JLayeredPane implements Observer {
 				allLables.add(label);
 			}
 		} else {
-			System.out.println("player set is 0");
+		
 		}
 	}
 
@@ -116,6 +117,7 @@ public class DominationView extends JLayeredPane implements Observer {
 	 */
 	public void receive(HashMap<String, Player> players, HashMap<String, Country> Countries,
 			HashMap<String, Continent> continents) {
+		
 		// flag=true;
 		this.playerSet = players;
 		System.out.println("This is in the receive function");
@@ -138,7 +140,7 @@ public class DominationView extends JLayeredPane implements Observer {
 		sb.append("       ");
 		int countryNum = playerSet.get(key).getCountryList().size();
 		float perct = (float) countryNum / countries.size();
-		perct = perct * 100;
+		perct = perct * 100;	
 		sb.append(perct);
 		sb.append("%           ");
 		String s = ownContinent(key);
@@ -150,7 +152,6 @@ public class DominationView extends JLayeredPane implements Observer {
 		sb.append("            ");
 		sb.append(getTotalArmy(key));
 		String allInfor = sb.toString();
-		System.out.println("Information in for " + allInfor);
 		return allInfor;
 	}
 
@@ -178,7 +179,6 @@ public class DominationView extends JLayeredPane implements Observer {
 		for (String key : cal.keySet()) {
 			continent = continent + key + " ";
 		}
-		System.out.println("The continent owned is " + continent);
 		return continent;
 	}
 

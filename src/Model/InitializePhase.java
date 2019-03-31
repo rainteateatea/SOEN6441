@@ -2,8 +2,16 @@ package Model;
 
 import java.awt.*;
 import java.util.*;
+import java.util.List;
+import java.util.Map.Entry;
+
 import javax.swing.JOptionPane;
 
+import Strategy.Aggressive;
+import Strategy.BehaviorStrategy;
+import Strategy.Benevolent;
+import Strategy.Cheater;
+import Strategy.Human;
 import View.CardView;
 
 /**
@@ -16,9 +24,10 @@ import View.CardView;
  */
 public class InitializePhase extends Observable {
 	private int playerNum;
-	private  HashMap<String, Player> playerSet;
-	private  HashMap<String, Country> countries;
+	private HashMap<String, Player> playerSet;
+	private HashMap<String, Country> countries;
 	private HashMap<String, Continent> continents;
+	private ArrayList<String> playerType = new ArrayList<String>();
 	private ColorList cList = new ColorList();
 
 	/**
@@ -99,10 +108,11 @@ public class InitializePhase extends Observable {
 	 * @param countries  A hash map storing all countries which are in the map.
 	 * @param continents A hash map storing all continents which are in the map.
 	 */
-	public void addData(int playerNum, HashMap<String, Country> countries, HashMap<String, Continent> continents) {
+	public void addData(int playerNum, ArrayList<String> playlist, HashMap<String, Country> countries, HashMap<String, Continent> continents) {
 		this.countries = countries;
 		this.continents = continents;
 		this.playerNum = playerNum;
+		this.playerType = playlist;
 	}
 
 	/**
@@ -156,9 +166,33 @@ public class InitializePhase extends Observable {
 	private boolean initializePlayerSet() {
 		LinkedList<Color> colorLinkedList = cList.getColors();
 		for (int i = 1; i <= playerNum; i++) {
-			Player player = new Player(String.valueOf(i));
+			String playName = this.playerType.remove(i-1);
+			Player player = new Player(playName);
+			
+//			setting player's strategy
+			switch (playName) {
+			case "Human":
+				player.setStrategy(new Human());
+				break;
+			case "Aggressive":
+				player.setStrategy(new Aggressive());
+				break;
+			case "Benevolent":
+				player.setStrategy(new Benevolent());
+				break;
+			case "Random":
+				player.setStrategy(new Strategy.Random());
+				break;
+			case "Cheater":
+				player.setStrategy(new Cheater());
+				break;
+			default:
+				System.out.println("Get into default!!");
+				break;
+			}
+			
 			player.setColor(colorLinkedList.get(i - 1));// set player color
-			playerSet.put(player.getPlayerName(), player);// add player to playerSet
+			playerSet.put(toString().valueOf(i), player);// add player to playerSet; key is "1,2,3..." 
 		}
 
 		if (playerSet.size() == playerNum) {
@@ -182,7 +216,7 @@ public class InitializePhase extends Observable {
 			armyDefault = 40;
 			break;
 		case 3:
-			armyDefault = 15;
+			armyDefault = 35;
 			break;
 		case 4:
 			armyDefault = 30;
@@ -334,7 +368,6 @@ public class InitializePhase extends Observable {
 		for (int i = 0; i < captital.size(); i++) {
 			String c = captital.get(i).getContinent();
 
-			listB.add(c);
 		}
 		for (int i = 0; i < listB.size(); i++) {
 			int temp = Collections.frequency(listB, listB.get(i));
@@ -426,14 +459,14 @@ public class InitializePhase extends Observable {
 	 * @param defender Defended country's name.
 	 * @param armies   The number of armies that player want to move.
 	 */
-	public void attTransforArmies(String attacker, String defender, int armies) {
-		Attack attack = new Attack(this.countries, this.continents, this.playerSet, attacker, defender);
-		attack.transferArmy(armies);
-		System.out.println(" Attack Phase: finished transfer armies.");
-		setChanged();
-		notifyObservers(this);
-
-	}
+//	public void attTransforArmies(String attacker, String defender, int armies) {
+//		Attack attack = new Attack(this.countries, this.continents, this.playerSet, attacker, defender);
+//		attack.transferArmy(armies);
+//		System.out.println(" Attack Phase: finished transfer armies.");
+//		setChanged();
+//		notifyObservers(this);
+//
+//	}
 
 	/**
 	 * This method a valid fortification.
@@ -620,7 +653,8 @@ public class InitializePhase extends Observable {
 }
 
 /**
- * <h1>ColorList</h1> This class defines color class, initialing all color
+ * <h1>ColorList</h1> 
+ * This class defines color class, initialing all color
  * information.
  *
  * @author jiamin_he

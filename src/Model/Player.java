@@ -31,7 +31,6 @@ public class Player {
 	private LinkedList<Country> countryList = new LinkedList<>();
 	private LinkedList<Card> cardList = new LinkedList<>();
 	private int changeCardTime = 1;
-	
 	private BehaviorStrategy strategy;
 
 	public BehaviorStrategy getStrategy() {
