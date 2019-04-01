@@ -1,7 +1,10 @@
 package Controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+
 import javax.swing.JOptionPane;
+
 import Model.Checkmap;
 import Model.Continent;
 import Model.Country;
@@ -38,18 +41,18 @@ public class InitGame_controller extends Object {
 	 * @param num The number of players.
 	 * @param filePath File path.
 	 */
-	public void receive(int num, String filePath) {
+	public void receive(int num, ArrayList<String> playList,String filePath) {
 
 		// checkMap whether connected or not
 		iomodel.readFile(filePath);
 		HashMap<String, Country> countries = iomodel.getCountries();
 		HashMap<String, Continent> continents = iomodel.getContinents();
-		System.out.println(countries.size() + " " + continents.size());
 		Checkmap checkmap = new Checkmap(countries, continents);
 		checkmap.judge();
 		boolean result = Message.isSuccess();
 		if (result) {
-			pharseModel.addData(num, countries, continents);
+			pharseModel.addData(num, playList,countries, continents);
+			
 			pharseModel.initPhase();
 			countries = pharseModel.getCountries();
 			continents = pharseModel.getContinents();
