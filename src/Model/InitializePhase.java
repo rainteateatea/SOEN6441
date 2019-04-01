@@ -12,11 +12,11 @@ import Strategy.BehaviorStrategy;
 import Strategy.Benevolent;
 import Strategy.Cheater;
 import Strategy.Human;
+import Strategy.RandomSt;
 import View.CardView;
 
 /**
- * <h1>InitializePhase</h1> 
- * This is an initialized phase class.
+ * <h1>InitializePhase</h1> This is an initialized phase class.
  * 
  * @author jiamin_he chenwei_song
  * @version 3.0
@@ -108,7 +108,8 @@ public class InitializePhase extends Observable {
 	 * @param countries  A hash map storing all countries which are in the map.
 	 * @param continents A hash map storing all continents which are in the map.
 	 */
-	public void addData(int playerNum, ArrayList<String> playlist, HashMap<String, Country> countries, HashMap<String, Continent> continents) {
+	public void addData(int playerNum, ArrayList<String> playlist, HashMap<String, Country> countries,
+			HashMap<String, Continent> continents) {
 		this.countries = countries;
 		this.continents = continents;
 		this.playerNum = playerNum;
@@ -125,9 +126,10 @@ public class InitializePhase extends Observable {
 		boolean initPlatyer = initializePlayerSet();
 		boolean initAmry = initializeArmy();
 		boolean initCount = initializeCountries();
-		
+
 		for (Map.Entry<String, Continent> cEntry : this.continents.entrySet()) {
-			System.out.println("Control Value of Continent " + cEntry.getKey()+ " : " + cEntry.getValue().getConvalue());
+			System.out
+					.println("Control Value of Continent " + cEntry.getKey() + " : " + cEntry.getValue().getConvalue());
 		}
 
 		if ((judgeNum && initPlatyer && initAmry && initCount) == true) {
@@ -151,7 +153,7 @@ public class InitializePhase extends Observable {
 			System.out.println("The number of player is greater than countries.");
 			return false;
 		} else {
-			
+
 			System.out.println("Get into initialized phase.");
 			return true;
 		}
@@ -166,9 +168,9 @@ public class InitializePhase extends Observable {
 	private boolean initializePlayerSet() {
 		LinkedList<Color> colorLinkedList = cList.getColors();
 		for (int i = 1; i <= playerNum; i++) {
-			String playName = this.playerType.remove(i-1);
+			String playName = this.playerType.get(i - 1);
 			Player player = new Player(playName);
-			
+
 //			setting player's strategy
 			switch (playName) {
 			case "Human":
@@ -181,7 +183,7 @@ public class InitializePhase extends Observable {
 				player.setStrategy(new Benevolent());
 				break;
 			case "Random":
-				player.setStrategy(new Strategy.Random());
+				player.setStrategy(new RandomSt());
 				break;
 			case "Cheater":
 				player.setStrategy(new Cheater());
@@ -190,9 +192,9 @@ public class InitializePhase extends Observable {
 				System.out.println("Get into default!!");
 				break;
 			}
-			
+
 			player.setColor(colorLinkedList.get(i - 1));// set player color
-			playerSet.put(toString().valueOf(i), player);// add player to playerSet; key is "1,2,3..." 
+			playerSet.put(toString().valueOf(i), player);// add player to playerSet; key is "1,2,3..."
 		}
 
 		if (playerSet.size() == playerNum) {
@@ -384,12 +386,12 @@ public class InitializePhase extends Observable {
 	}
 
 	/**
-     * This method is used to calculate army produced by cards.
-     *
-     * @param player Name of player.
-     * @param reCards Cards player hold after change cards phase.
-     * @param change Change cards or not.
-     */
+	 * This method is used to calculate army produced by cards.
+	 *
+	 * @param player  Name of player.
+	 * @param reCards Cards player hold after change cards phase.
+	 * @param change  Change cards or not.
+	 */
 	public void cardArmy(String player, LinkedList<Card> reCards, boolean change) {
 		if (!change) {
 
@@ -488,10 +490,10 @@ public class InitializePhase extends Observable {
 	}
 
 	/**
-     * This method is to earnCard.
-     *
-     * @param player Current player.
-     */
+	 * This method is to earnCard.
+	 *
+	 * @param player Current player.
+	 */
 	public void earnCard(String player) {
 		int card = (int) (1 + Math.random() * 3);
 		Card c = new Card();
@@ -537,8 +539,8 @@ public class InitializePhase extends Observable {
 	 * The method judges these countries can transfer or not.
 	 * 
 	 * @param player The current player.
-	 * @param s The start country.
-	 * @param d The destination country.
+	 * @param s      The start country.
+	 * @param d      The destination country.
 	 * @return true if these countries can transfer.
 	 */
 	public boolean canTransfer(String player, String s, String d) {
@@ -581,10 +583,11 @@ public class InitializePhase extends Observable {
 	}
 
 	/**
-	 * The method is to check whether exists a path that can execute transfer method.
+	 * The method is to check whether exists a path that can execute transfer
+	 * method.
 	 * 
 	 * @param player The current player.
-	 * @param Path All the path from start country to destination.
+	 * @param Path   All the path from start country to destination.
 	 * @return true If there is a path that belongs to this player.
 	 */
 	private boolean checkPath(String player, ArrayList<ArrayList<Integer>> Path) {
@@ -616,7 +619,7 @@ public class InitializePhase extends Observable {
 	/**
 	 * The method checks whether current player click right country.
 	 * 
-	 * @param cplayer Current player.
+	 * @param cplayer  Current player.
 	 * @param ccountry Current country.
 	 * @return true if the player owns the country.
 	 */
@@ -634,10 +637,10 @@ public class InitializePhase extends Observable {
 	}
 
 	/**
-     * This method is to find the maximum of countries.
-     *
-     * @return maximum The max of countries.
-     */
+	 * This method is to find the maximum of countries.
+	 *
+	 * @return maximum The max of countries.
+	 */
 	private int returnMax() {
 		int max = 0;
 		for (String m : countries.keySet()) {
@@ -650,11 +653,89 @@ public class InitializePhase extends Observable {
 		return max + 1;
 	}
 
+	/**
+	 * This method implements auto changing cards.
+	 * 
+	 * @param curPlayer Current player.
+	 * @return Result of changing cards.
+	 */
+	public String autoChangeCard(Player curPlayer) {
+
+		if (curPlayer.getCardList().size() < 3) {
+			return "0 0";
+		}
+
+		int armies = 0;
+		LinkedList<Card> newlist = new LinkedList<Card>();
+		LinkedList<Card> i = new LinkedList<Card>();
+		LinkedList<Card> c = new LinkedList<Card>();
+		LinkedList<Card> a = new LinkedList<Card>();
+
+		for (Card card : curPlayer.getCardList()) {
+			if (card.getName().equals(i)) {
+				i.add(card);
+			} else if (card.getName().equals(a)) {
+				a.add(card);
+			} else {
+				c.add(card);
+			}
+		}
+
+		if (i.size() >= 3) {
+			for (int j = 0; j < 3; j++) {
+				i.pollFirst();
+			}
+
+			armies = armies + curPlayer.getChangeCardTime() * 5;
+			curPlayer.setChangeCardTime(curPlayer.getChangeCardTime() + 1);
+		} else if (c.size() >= 3) {
+			for (int j = 0; j < 3; j++) {
+				c.pollFirst();
+			}
+
+			armies = armies + curPlayer.getChangeCardTime() * 5;
+			curPlayer.setChangeCardTime(curPlayer.getChangeCardTime() + 1);
+		} else {
+			for (int j = 0; j < 3; j++) {
+				a.pollFirst();
+			}
+
+			armies = armies + curPlayer.getChangeCardTime() * 5;
+			curPlayer.setChangeCardTime(curPlayer.getChangeCardTime() + 1);
+		}
+
+		if (i.size() != 0 && a.size() != 0 && c.size() != 0) {
+			i.pollFirst();
+			a.pollFirst();
+			c.pollFirst();
+			armies = armies + curPlayer.getChangeCardTime() * 5;
+			curPlayer.setChangeCardTime(curPlayer.getChangeCardTime() + 1);
+		}
+
+		String result = toString().valueOf(armies);
+
+		newlist.addAll(i);
+		newlist.addAll(a);
+		newlist.addAll(c);
+		curPlayer.setCardList(newlist);
+
+		if (i.size() >= 3 || a.size() >= 3 || c.size() >= 3 || (i.size() != 0 && a.size() != 0 && c.size() != 0)) {
+			result = result + " " + "1";
+			setChanged();
+			notifyObservers(this);
+			return result;
+		}
+
+		result = result + " " + "0";
+		setChanged();
+		notifyObservers(this);
+		return result;
+	}
+
 }
 
 /**
- * <h1>ColorList</h1> 
- * This class defines color class, initialing all color
+ * <h1>ColorList</h1> This class defines color class, initialing all color
  * information.
  *
  * @author jiamin_he
