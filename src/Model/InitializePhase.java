@@ -542,89 +542,38 @@ public class InitializePhase extends Observable {
 	 */
 	public boolean canTransfer(String player, String s, String d) {
 		ArrayList<String> fromlist = new ArrayList<>();
+		HashMap<String, String> flagcountry = new HashMap<>();
+		flagcountry.put(s, s);
 		fromlist.add(s);
-		boolean result = findPath(player, fromlist, d);
-//		int maxCountry = returnMax();
-//		FindPath fp = new FindPath(maxCountry, playerSet,player);
-//		String p = player;
-//		Iterator<Map.Entry<String, Country>> iterator = countries.entrySet().iterator();
-//		
-//		// build graph
-//		while (iterator.hasNext()) {
-//			Map.Entry<String, Country> entry = iterator.next();
-//			int from = Integer.valueOf(entry.getKey());
-//			String[] clist = entry.getValue().getCountryList().split(" ");
-//			for (int i = 0; i < clist.length; i++) {
-//				fp.addEdge(from, Integer.valueOf(clist[i]));
-//			}
-//
-//		}
-//
-//		int start = Integer.valueOf(s);
-//		int end = Integer.valueOf(d);
-//
-//		fp.printAllPaths(start, end);
-//
-//		boolean result = fp.canTransfer;
-		
-		
-		
-//		ArrayList<ArrayList<Integer>> allpath = new ArrayList<>();
-//
-//		String[] paths = fp.allpath.split("#");
-//		for (int i = 0; i < paths.length; i++) {
-//			ArrayList<Integer> onepath = new ArrayList<>();
-//			String[] line = paths[i].split(" ");
-//			for (int j = 0; j < line.length; j++) {
-//				onepath.add(Integer.valueOf(line[j]));
-//			}
-//			allpath.add(onepath);
-//		}
-//		System.out.println(allpath);
-//		boolean result = checkPath(p, allpath);
+		boolean result = findPath(player, fromlist, d,flagcountry);
 		return result;
 
 	}
 	
-	private boolean findPath(String player,ArrayList<String> from, String to) {
+	private boolean findPath(String player,ArrayList<String> from, String to,HashMap<String, String> flagcountry) {
+		boolean result = false;
+		ArrayList<String> templist = new ArrayList<>();
 		for (int i = 0; i < from.size(); i++) {
-			
-		}
-		return true;
-	}
-
-	/**
-	 * The method is to check whether exists a path that can execute transfer method.
-	 * 
-	 * @param player The current player.
-	 * @param Path All the path from start country to destination.
-	 * @return true If there is a path that belongs to this player.
-	 */
-	private boolean checkPath(String player, ArrayList<ArrayList<Integer>> Path) {
-		boolean isOwn = false;
-
-		String p = player;
-		for (int i = 0; i < Path.size(); i++) {
-			boolean temp = true;
-			for (int j = 0; j < Path.get(i).size(); j++) {
-				boolean isMatch = rightcountry(p, String.valueOf(Path.get(i).get(j)));
-
-				if (!isMatch) {
-					temp = false;
-
-					break;
+			String[] countlist = countries.get(from.get(i)).getCountryList().split(" ");
+			for (int j = 0; j < countlist.length; j++) {
+				boolean isMatch = rightcountry(player, countlist[j]);
+				if (isMatch && countlist[j].equals(to)) {
+					return true;
+				}
+				else if (isMatch && !countlist[j].equals(to) &&  !flagcountry.containsKey(countlist[j])) {
+					templist.add(countlist[j]);
+					flagcountry.put(countlist[j], countlist[j]);
 				}
 			}
-			if (temp) {
-				isOwn = true;
-				break;
-
-			}
-
 		}
-
-		return isOwn;
+		if (templist.size()!=0) {
+		return	findPath(player, templist, to, flagcountry);
+		}
+		else {
+			return result;
+		}
 	}
+
 
 	/**
 	 * The method checks whether current player click right country.
@@ -646,22 +595,6 @@ public class InitializePhase extends Observable {
 		return match;
 	}
 
-	/**
-     * This method is to find the maximum of countries.
-     *
-     * @return maximum The max of countries.
-     */
-	private int returnMax() {
-		int max = 0;
-		for (String m : countries.keySet()) {
-			int temp = countries.get(m).getName();
-			if (temp > max) {
-				max = temp;
-			}
-
-		}
-		return max + 1;
-	}
 	
 	public void doublerein(String country){
 		int army = countries.get(country).getArmy()*2;
