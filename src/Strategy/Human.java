@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 
+
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -42,19 +43,19 @@ public class Human implements BehaviorStrategy{
 		countries = observable.getCountries();
 		continents = observable.getContinents();
 		playerSet = observable.getPlayerSet();
-	
-	boolean match = rightcountry(playView.name.getText(), c.getName());
+		String[] fullname =playView.name.getText().split("_");
+	boolean match = rightcountry(fullname[1], c.getName());
 
 				if (match) {
-					observable.Startup(playView.name.getText(), click);
+					observable.Startup(fullname[1], click);
 					
 					// update country army number
 					String[] old = c.getText().split(" ");
 					String now = old[0] + " " + countries.get(c.getName()).getArmy();
 					c.setText(now);
-					playView.armies.setText(String.valueOf(playerSet.get(playView.name.getText()).getArmy()));
-					if (playerSet.get(playView.name.getText()).getArmy() == 0) {
-						boolean canAttack = b.canAttack(playView.name.getText());
+					playView.armies.setText(String.valueOf(playerSet.get(fullname[1]).getArmy()));
+					if (playerSet.get(fullname[1]).getArmy() == 0) {
+						boolean canAttack = b.canAttack(fullname[1]);
 						if (canAttack) {
 							
 							// enter attack phase
@@ -107,7 +108,8 @@ public class Human implements BehaviorStrategy{
 			} else {
 				
 				// one - time
-				String dicses = b.dicsnumber(playView.name.getText(), atcoun[1], "at", "");
+				String[] fullname = playView.name.getText().split("_");
+				String dicses = b.dicsnumber(fullname[1], atcoun[1], "at", "");
 				if (dicses != "") {
 					
 					// defender choose disc
@@ -141,11 +143,12 @@ public class Human implements BehaviorStrategy{
 		
 		String[] readrecord = record.split(" ");
 		if (readrecord[1].equals("0")) {//update countries information
-			updateCountries(att);
-			updateCountries(def);
+		//	updateCountries(att);
+		//	updateCountries(def);
 			att.setBorder(null);
 			def.setBorder(null);
-			if (readrecord[0].equals(playView.name.getText())) {
+			String[] fullname = playView.name.getText().split("_");
+			if (readrecord[0].equals(fullname[1])) {
 				JOptionPane.showMessageDialog(null, "attacker Player"+ playView.name.getText()+" win");
 				if (!readrecord[2].equals("0")) {
 					playView.WIN = true;
@@ -164,13 +167,13 @@ public class Human implements BehaviorStrategy{
 		}
 		else {
 			playView.WIN = true;
-			updateCountries(att);
-			updateCountries(def);
+		//	updateCountries(att);
+		//	updateCountries(def);
 		
 			int move = b.moveArmies(Integer.valueOf(readrecord[1]), Integer.valueOf(readrecord[2]));
 			observable.Fortification(att.getName(), def.getName(), move);
-			updateCountries(att);
-			updateCountries(def);
+		//	updateCountries(att);
+		//	updateCountries(def);
 			att.setBorder(null);
 			def.setBorder(null);
 		}
@@ -224,7 +227,8 @@ public class Human implements BehaviorStrategy{
 		countries = observable.getCountries();
 		continents = observable.getContinents();
 		playerSet = observable.getPlayerSet();
-		boolean canTransfer = observable.canTransfer(playView.name.getText(), from.getName(), to);
+		String[] fullname = playView.name.getText().split("_");
+		boolean canTransfer = observable.canTransfer(fullname[1], from.getName(), to);
 
 		// input how many armies you want to move
 		String question = "how many armies you want to move from" + from.getName() + "to " + to;
@@ -255,7 +259,7 @@ public class Human implements BehaviorStrategy{
 			
 			// occupy a territory then obtain a card
 			if (playView.WIN) {
-				observable.earnCard(playView.name.getText());
+				observable.earnCard(fullname[1]);
 			}
 			playView.WIN = false;
 			
@@ -264,14 +268,15 @@ public class Human implements BehaviorStrategy{
 			playView.phase.setText("Reinforcement");
 
 			// find next player
-			String nextP = b.findnext(playView.name.getText());
+			String nextP = b.findnext(fullname[1]);
 
 			// update next player armies
 			System.out.println(playerSet.get(nextP).getArmy());
 			observable.Reinforcement(nextP);
 			
 			// change player
-			playView.name.setText(nextP);
+			String playername = playerSet.get(nextP).getPlayerName()+"_"+nextP;
+			playView.name.setText(playername);
 
 			playView.color.setBackground(playerSet.get(nextP).getColor());
 
