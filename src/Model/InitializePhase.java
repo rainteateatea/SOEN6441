@@ -218,7 +218,7 @@ public class InitializePhase extends Observable {
 			armyDefault = 40;
 			break;
 		case 3:
-			armyDefault = 35;
+			armyDefault = 7;
 			break;
 		case 4:
 			armyDefault = 30;
@@ -329,6 +329,22 @@ public class InitializePhase extends Observable {
 		int system = SystemArmy(player);
 		int continent = ContinentArmy(player);
 		int card = 0;
+		
+		if (!playerSet.get(player).equals("Human") && !playerSet.get(player).equals("Cheater")) {
+			
+			String result = autoChangeCard(playerSet.get(player));
+			String[] tmp = result.split(" ");
+			card = card + Integer.parseInt(tmp[0]);
+			
+			while (Integer.parseInt(tmp[1]) == 1) {
+				
+				result = autoChangeCard(playerSet.get(player));
+				tmp = result.split(" ");
+				card = card + Integer.parseInt(tmp[0]);
+			}
+			
+		}
+			
 		playerSet.get(player).setArmy(system + continent + card);
 
 		setChanged();
@@ -721,14 +737,14 @@ public class InitializePhase extends Observable {
 
 		if (i.size() >= 3 || a.size() >= 3 || c.size() >= 3 || (i.size() != 0 && a.size() != 0 && c.size() != 0)) {
 			result = result + " " + "1";
-			setChanged();
-			notifyObservers(this);
+//			setsChanged();
+//			notifyObservers(this);
 			return result;
 		}
 
 		result = result + " " + "0";
-		setChanged();
-		notifyObservers(this);
+//		setChanged();
+//		notifyObservers(this);
 		return result;
 	}
 
