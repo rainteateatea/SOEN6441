@@ -7,9 +7,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -20,12 +22,12 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import Controller.InitGame_controller;
-import Controller.LoadMap_controller;
 import Model.Checkmap;
 import Model.Continent;
 import Model.Country;
 import Model.IO;
 import Model.Message;
+import View.SelectMap.selectPane;
 
 /**
  * <h1>InitGame</h1> 
@@ -46,26 +48,33 @@ public class InitGame extends JFrame {
 	/**
 	 * It is a constructor that creates a thread of JFrame.
 	 */
+//	public static void main(String[] args) {
+//		new InitGame();
+//	}
 	public InitGame() {
+
 		EventQueue.invokeLater(new Runnable() {
 			
 			/**
-			 * It is a thread that upload a thread
+			 * It is a thread.
 			 */
 			@Override
 			public void run() {
-				try {
-					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-						| UnsupportedLookAndFeelException ex) {
-					ex.printStackTrace();
-				}
-				frame.add(new initPane());
-				frame.pack();
-				frame.setLocationRelativeTo(null);
-				frame.setVisible(true);
+				 try {
+	                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+	                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+	                    ex.printStackTrace();
+	                }
+	                frame.add(new initPane());
+	                frame.pack();
+	                frame.setLocationRelativeTo(null);
+	                frame.setVisible(true);
+	             
 			}
-		});
+		});	
+
+
+		
 	}
 
 	/**
@@ -79,27 +88,64 @@ public class InitGame extends JFrame {
 		 */
 		public initPane() {
 
-			JLabel palyernum = new JLabel("player number :");
-			palyernum.setBounds(150, 100, 100, 30);
+			JLabel palyernum = new JLabel("player :");
+			palyernum.setBounds(20, 100, 100, 30);
 			add(palyernum);
-
-			final JTextField num = new JTextField(20);
-			num.setBounds(250, 100, 80, 25);
-			add(num);
-			num.addKeyListener(new KeyAdapter() {
-				
-				/**
-				 * This is a keyPressed function.
-				 */
-				@Override
-				public void keyPressed(KeyEvent key) {
-					if (key.getKeyCode() == KeyEvent.VK_ENTER) {
-						System.out.println(num.getText());
-						n = Integer.parseInt(num.getText());
-					}
-				}
-
-			});
+			@SuppressWarnings("rawtypes")
+			final ArrayList<JComboBox> players = new ArrayList<>();
+			JComboBox<String> p1=new JComboBox<String>();
+			p1.addItem("Human");
+			p1.addItem("Aggressive");
+			p1.addItem("Benevolent");
+			p1.addItem("Random");
+			p1.addItem("Cheater");
+			p1.setBounds(90, 100, 100, 30);
+			add(p1);
+			players.add(p1);
+			
+			JComboBox<String> p2=new JComboBox<String>();
+			p2.addItem("Human");
+			p2.addItem("Aggressive");
+			p2.addItem("Benevolent");
+			p2.addItem("Random");
+			p2.addItem("Cheater");
+			p2.setBounds(190, 100, 100, 30);
+			add(p2);
+			players.add(p2);
+			
+			JComboBox<String> p3=new JComboBox<String>();
+			p3.addItem("null");
+			p3.addItem("Human");
+			p3.addItem("Aggressive");
+			p3.addItem("Benevolent");
+			p3.addItem("Random");
+			p3.addItem("Cheater");
+			p3.setBounds(290, 100, 100, 30);
+			add(p3);
+			players.add(p3);
+			
+			JComboBox<String> p4=new JComboBox<String>();
+			p4.addItem("null");
+			p4.addItem("Human");
+			p4.addItem("Aggressive");
+			p4.addItem("Benevolent");
+			p4.addItem("Random");
+			p4.addItem("Cheater");
+			p4.setBounds(390, 100, 100, 30);
+			add(p4);
+			players.add(p4);
+			
+			JComboBox<String> p5=new JComboBox<String>();
+			p5.addItem("null");
+			p5.addItem("Human");
+			p5.addItem("Aggressive");
+			p5.addItem("Benevolent");
+			p5.addItem("Random");
+			p5.addItem("Cheater");
+			p5.setBounds(490, 100, 100, 30);
+			add(p5);
+			players.add(p5);
+			
 
 			JButton select = new JButton("Select a map");
 			add(select);
@@ -137,8 +183,18 @@ public class InitGame extends JFrame {
 
 								frame.dispose();
 
+								ArrayList<String> playlist = new ArrayList<>();
+								for (int i = 0; i < players.size(); i++) {
+									//System.out.println(players.get(i).getSelectedItem());
+									String strategy = (String) players.get(i).getSelectedItem();
+									if (!strategy.equals("null")) {
+										System.out.println(strategy);
+										playlist.add(strategy);
+									}
+								}
 								InitGame_controller controller = new InitGame_controller();
-								controller.receive(n, filename);
+								//n = 3;
+								controller.receive(playlist.size(),playlist, filename);
 							}
 
 						} else {
