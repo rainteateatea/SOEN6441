@@ -44,15 +44,15 @@ public class Human implements BehaviorStrategy{
 		continents = observable.getContinents();
 		playerSet = observable.getPlayerSet();
 		String[] fullname =playView.name.getText().split("_");
-	boolean match = rightcountry(fullname[1], c.getName());
+		boolean match = rightcountry(fullname[1], c.getName());
 
 				if (match) {
 					observable.Startup(fullname[1], click);
 					
 					// update country army number
-					String[] old = c.getText().split(" ");
-					String now = old[0] + " " + countries.get(c.getName()).getArmy();
-					c.setText(now);
+//					String[] old = c.getText().split(" ");
+//					String now = old[0] + " " + countries.get(c.getName()).getArmy();
+//					c.setText(now);
 					playView.armies.setText(String.valueOf(playerSet.get(fullname[1]).getArmy()));
 					if (playerSet.get(fullname[1]).getArmy() == 0) {
 						boolean canAttack = b.canAttack(fullname[1]);
@@ -143,8 +143,6 @@ public class Human implements BehaviorStrategy{
 		
 		String[] readrecord = record.split(" ");
 		if (readrecord[1].equals("0")) {//update countries information
-		//	updateCountries(att);
-		//	updateCountries(def);
 			att.setBorder(null);
 			def.setBorder(null);
 			String[] fullname = playView.name.getText().split("_");
@@ -167,52 +165,12 @@ public class Human implements BehaviorStrategy{
 		}
 		else {
 			playView.WIN = true;
-		//	updateCountries(att);
-		//	updateCountries(def);
 		
 			int move = b.moveArmies(Integer.valueOf(readrecord[1]), Integer.valueOf(readrecord[2]));
 			observable.Fortification(att.getName(), def.getName(), move);
-		//	updateCountries(att);
-		//	updateCountries(def);
 			att.setBorder(null);
 			def.setBorder(null);
 		}
-	}
-	
-
-
-	/**
-	 * This method updates JLabel information of countries.
-	 *
-	 * @param label A JLabel shows a country information.
-	 */
-	public void updateCountries(JLabel label) {
-		
-		// update country army number
-		String[] old = label.getText().split(" ");
-		String now = old[0] + " " + countries.get(label.getName()).getArmy();
-		label.setText(now);
-		
-		// update country color
-		ImageIcon imageIcon = (ImageIcon) label.getIcon();
-		Image image = imageIcon.getImage();
-
-		BufferedImage img = (BufferedImage) image;
-		int width = img.getWidth();
-		int height = img.getHeight();
-
-		WritableRaster raster = img.getRaster();
-		for (int xx = 0; xx < width; xx++) {
-			for (int yy = 0; yy < height; yy++) {
-				int[] pixels = raster.getPixel(xx, yy, (int[]) null);
-				pixels[0] = countries.get(label.getName()).getColor().getRed();
-				pixels[1] = countries.get(label.getName()).getColor().getGreen();
-				pixels[2] = countries.get(label.getName()).getColor().getBlue();
-				raster.setPixel(xx, yy, pixels);
-			}
-
-		}
-
 	}
 	/**
 	 * This method implements fortification.
@@ -248,14 +206,14 @@ public class Human implements BehaviorStrategy{
 
 			observable.Fortification(from.getName(), to, Integer.valueOf(str));
 			
-			// update country army number
-			String[] old = from.getText().split(" ");
-			String now = old[0] + " " + countries.get(from.getName()).getArmy();
-			from.setText(now);
+//			// update country army number
+//			String[] old = from.getText().split(" ");
+//			String now = old[0] + " " + countries.get(from.getName()).getArmy();
+//			from.setText(now);
 
-			String[] toold = c.getText().split(" ");
-			String tonow = toold[0] + " " + countries.get(c.getName()).getArmy();
-			c.setText(tonow);
+//			String[] toold = c.getText().split(" ");
+//			String tonow = toold[0] + " " + countries.get(c.getName()).getArmy();
+//			c.setText(tonow);
 			
 			// occupy a territory then obtain a card
 			if (playView.WIN) {
@@ -280,13 +238,20 @@ public class Human implements BehaviorStrategy{
 
 			playView.color.setBackground(playerSet.get(nextP).getColor());
 
-			if (playerSet.get(nextP).getCardList().size() != 0) {
+			//next player 为 Human 并且 card army 不为0
+			if (playerSet.get(nextP).getCardList().size() != 0 && playerSet.get(nextP).getPlayerName().equals("Human")) {
 				observable.cardArmy(nextP, playerSet.get(nextP).getCardList(), false);
 				playView.armies.setText(
 						"<html><body><p align=\"center\">calculating...<br/>press&nbsp;reinforcement</p></body></html>");
 
-			} else {
+			}
+			//next player 为 Human 并且 card army 为0
+			else if(playerSet.get(nextP).getCardList().size() == 0 &&playerSet.get(nextP).getPlayerName().equals("Human")){
 				playView.armies.setText(String.valueOf(playerSet.get(nextP).getArmy()));
+			}
+			// next player 不是 human
+			else if (!playerSet.get(nextP).getPlayerName().equals("Human")) {
+				observable.nextTurn(1);
 			}
 
 		}

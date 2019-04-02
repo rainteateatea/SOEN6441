@@ -27,6 +27,8 @@ public class InitializePhase extends Observable {
 	private HashMap<String, Continent> continents;
 	private ArrayList<String> playerType = new ArrayList<String>();
 	private ColorList cList = new ColorList();
+	public boolean change = false;
+	
 
 	/**
 	 * This is a constructor of initializePhase.
@@ -596,10 +598,79 @@ public class InitializePhase extends Observable {
 	}
 
 	
-	public void doublerein(String country){
+	public InitializePhase cheaterRein(String player, String country){
 		int army = countries.get(country).getArmy()*2;
 		countries.get(country).setArmy(army);
+		LinkedList<Country> countrylist = playerSet.get(player).getCountryList();
+		for (int i = 0; i < countrylist.size(); i++) {
+			String couname = String.valueOf(countrylist.get(i).getName());
+			if (country.equals(couname)) {
+				countrylist.get(i).setArmy(army);
+				break;
+			}
+		}
 		setChanged();
+		notifyObservers(this);
+		return this;
+	}
+	public InitializePhase cheaterAttack(String attaker, String defender, String country) {
+		Country c = countries.get(country);
+		c.setColor(playerSet.get(attaker).getColor());
+		LinkedList<Country> atlist = playerSet.get(attaker).getCountryList();
+		atlist.add(c);
+		playerSet.get(attaker).setCountryList(atlist);
+		
+		LinkedList<Country> deList = playerSet.get(defender).getCountryList();
+		for (int i = 0; i < deList.size(); i++) {
+			if (c.getName() == deList.get(i).getName()) {
+				deList.remove(i);
+				playerSet.get(defender).setCountryList(deList);
+				break;
+			}
+		}
+		
+		if (playerSet.get(defender).getCountryList().size() == 0) {
+			playerSet.remove(defender);
+		}
+		
+		setChanged();
+		notifyObservers(this);
+		return this;
+	}
+	
+	public InitializePhase cheaterForti(String player, int country) {
+		String cname = String.valueOf(country);
+		//update countries
+		int armies = countries.get(cname).getArmy()*2;
+		countries.get(cname).setArmy(armies);
+		
+		//update playerSet countrylist 
+		LinkedList<Country> list = playerSet.get(player).getCountryList();
+		for (int i = 0; i < list.size(); i++) {
+			if (list.get(i).getName() == country) {
+				list.get(i).setArmy(armies);
+				break;
+			}
+		}
+		setChanged();
+		notifyObservers(this);
+		return this;
+	}
+	/**
+	 * This method modifies a signal for next turn.
+	 * 
+	 * @param signal 1 get into next turn and 0 stays in current turn.
+	 */
+	public void nextTurn(int signal) {
+		if (signal == 0) {
+			change = false;
+		}
+		else{
+			change = true;
+		}
+		
+		setChanged();
+		notifyObservers(this);
 	}
 
 }

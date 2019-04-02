@@ -8,6 +8,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.File;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -16,6 +18,8 @@ import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -41,10 +45,35 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter.DEFAULT;
 import View.PlayView;
 
 
-public class Test{
+public class Test {
 	public static HashMap<Integer, Integer> h = new HashMap<>();
+	
+	
 	public static void main(String args[]) {
 		
+//		final Timer timer = new Timer();
+//	    TimerTask task = new TimerTask() {
+//	        private int count;
+//	  
+//	        @Override
+//	        public void run() {
+//	            this.count++;
+//	            System.out.println(count);
+//	            if (count == 10) {
+//	                System.out.println("定时器停止了");
+//	                timer.cancel();// 停止定时器
+//	            }
+//	        }
+//	    };
+//	    timer.schedule(task, 0, 1000);// 1秒一次
+//		File file = new File("mapfile/");
+//		File[] files = file.listFiles();
+//		ArrayList<String> listfile = new ArrayList<>();
+//		
+//		for (int i = 0; i < files.length; i++) {
+//			
+//			System.out.println(files[i]);
+//		}
 
 //		
 //		LinkedList<String> list = new LinkedList<>();
@@ -129,41 +158,41 @@ public class Test{
 //	
 //
 //		//card 挑选卡片换卡界面
-	    JPanel myPanel = new JPanel();
+//	    JPanel myPanel = new JPanel();
 //	   
 //	   frame.setUndecorated(true);
-	    JCheckBox jcb1 = new JCheckBox("card1");// 定义一个复选框
-	  	JCheckBox jcb2 = new JCheckBox("card 2");// 定义一个复选框
-	  	JCheckBox jcb3 = new JCheckBox("card 3");// 定义一个复选框
-	  	jcb1.setSelected(false);// 复选框状态为 未选择
-	  	jcb1.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				// TODO Auto-generated method stub
-				
-			}
-		});;
+//	    JCheckBox jcb1 = new JCheckBox("card1");// 定义一个复选框
+//	  	JCheckBox jcb2 = new JCheckBox("card 2");// 定义一个复选框
+//	  	JCheckBox jcb3 = new JCheckBox("card 3");// 定义一个复选框
+//	  	jcb1.setSelected(false);// 复选框状态为 未选择
+//	  	jcb1.addActionListener(new ActionListener() {
+//			
+//			@Override
+//			public void actionPerformed(ActionEvent arg0) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//		});;
 //	  	
 //	 
-	  	myPanel.add(jcb1);
-	  	myPanel.add(jcb2);
-	  	myPanel.add(jcb3);
+//	  	myPanel.add(jcb1);
+//	  	myPanel.add(jcb2);
+//	  	myPanel.add(jcb3);
 //	  	frame.add(myPanel);
-	int result = JOptionPane.showConfirmDialog(null,myPanel, "!!!", JOptionPane.DEFAULT_OPTION);
+//	int result = JOptionPane.showConfirmDialog(null,myPanel, "!!!", JOptionPane.DEFAULT_OPTION);
 	//     int result = JOptionPane.showConfirmDialog(null, myPanel);
 
-	      if (result == JOptionPane.OK_OPTION ) {
-	    	   
-		         System.out.println("card value: " + jcb1.isSelected() +" "+ jcb1.getText());
-		        
-		      }
+//	      if (result == JOptionPane.OK_OPTION ) {
+//	    	   
+//		         System.out.println("card value: " + jcb1.isSelected() +" "+ jcb1.getText());
+//		        
+//		      }
 	      
 	     
-//		for (int i = 0; i < 20; i++) {
-//			int j = (int)(1+Math.random()*3);
-//			System.out.println(j);
-//		}
+		for (int i = 0; i < 20; i++) {
+			int j = (int)(0+Math.random()*7);
+			System.out.println(j);
+		}
 		
 //		 attack 输入攻 守双方 骰子数界面
 //	      JPanel myPanel = new JPanel();

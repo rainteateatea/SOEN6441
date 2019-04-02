@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
@@ -19,6 +20,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -59,7 +62,7 @@ public class PlayView extends JFrame implements Observer {
 	public static String currentPhase;
 	public static JButton phase;
 	public static boolean WIN = false;
-	private ArrayList<JLabel> labellist = new ArrayList<>();
+	public ArrayList<JLabel> labellist = new ArrayList<>();
 	BackEnd b;
 	InitializePhase observable = new InitializePhase();
 
@@ -80,6 +83,13 @@ public class PlayView extends JFrame implements Observer {
 		continents = ((InitializePhase) obs).getContinents();
 		playerSet = ((InitializePhase) obs).getPlayerSet();
 		updateLabel();
+		boolean isChange =  ((InitializePhase) obs).change;
+		if (isChange) {
+			//当前玩家不是human
+			String[] fullname = name.getText().split("_");
+			playerSet.get(fullname[1]).reinforcement(null, "", observable, b);
+		}
+		
 
 	}
 
@@ -127,11 +137,31 @@ public class PlayView extends JFrame implements Observer {
 
 	private void updateLabel() {
 		for (int i = 0; i < labellist.size(); i++) {
-			JLabel label = labellist.get(i);
+			final JLabel label = labellist.get(i);
 
 			
 			// update country army number
 			String[] old = label.getText().split(" ");
+			if (!old[1].equals(String.valueOf(countries.get(label.getName()).getArmy()))) {
+				
+				final Timer timer = new Timer();
+			    TimerTask task = new TimerTask() {
+			        private int count = 12;
+			  
+			        @Override
+			        public void run() {
+			            this.count++;
+			            label.setFont(new Font("Serif", Font.BOLD, count));
+			           // System.out.println(count);
+			            if (count == 20) {
+			            	label.setFont(new Font("Serif", Font.BOLD, 12));
+			                timer.cancel();
+			            }
+			        }
+			    };
+			    timer.schedule(task, 0,300);
+			
+			}
 			String now = old[0] + " " + countries.get(label.getName()).getArmy();
 			label.setText(now);
 			
@@ -262,6 +292,11 @@ public class PlayView extends JFrame implements Observer {
 			armies.setName("armies");
 			armies.setBounds(1100, 70, 80, 25);
 			add(armies);
+			
+			//判断是否为Human
+			if (!playerSet.get("1").getPlayerName().equals("Human")) {
+				startupPlayer("1");
+			}
 
 		}
 
@@ -288,6 +323,60 @@ public class PlayView extends JFrame implements Observer {
 		@Override
 		public Dimension getPreferredSize() {
 			return new Dimension(1200, 650);
+		}
+		
+		
+		public void startupPlayer(String player) {
+			//start up phase
+			String c = randomCountry(player);
+			observable.Startup(player, c);
+			//update player
+			String nextP = b.nextplayer(player);
+			if (nextP == "") {
+				// get into reinforcement phase
+				if (playerSet.get("1").getPlayerName().equals("Human")) {
+					//next player 为 human
+					JOptionPane.showMessageDialog(null, "enter reinforcement phase");
+				}
+				else {
+					//next player 非 human
+				//	reinforcement("1");
+					playerSet.get("1").reinforcement(name,"", observable, b);
+				}
+				
+				System.out.println("enter reinforcement phase");
+				phase.setText("Reinforcement");
+				currentPhase = "Reinforcement";
+				observable.Reinforcement("1");
+				String lastname = playerSet.get("1").getPlayerName()+"_"+"1";
+				name.setText(lastname);
+				armies.setText(String.valueOf(playerSet.get("1").getArmy()));
+				color.setBackground(playerSet.get("1").getColor());
+			}
+			else if (!playerSet.get(nextP).getPlayerName().equals("Human")) {
+				String fullname = playerSet.get(nextP).getPlayerName()+"_"+nextP;
+				name.setText(fullname);
+				armies.setText(String.valueOf(playerSet.get(nextP).getArmy()));
+				color.setBackground(playerSet.get(nextP).getColor());
+				startupPlayer(nextP);
+			}
+			else {
+				String fullname = playerSet.get(nextP).getPlayerName()+"_"+nextP;
+				name.setText(fullname);
+				armies.setText(String.valueOf(playerSet.get(nextP).getArmy()));
+				color.setBackground(playerSet.get(nextP).getColor());
+			}
+			
+			
+}
+		
+		
+		private String randomCountry(String player) {
+			LinkedList<Country> list = playerSet.get(player).getCountryList();
+			int n = (int)(0+Math.random()*list.size());
+			int cou = list.get(n).getName();
+			return String.valueOf(cou);
+			
 		}
 		
 		/**
@@ -406,7 +495,16 @@ public class PlayView extends JFrame implements Observer {
 								armies.setText(String.valueOf(playerSet.get("1").getArmy()));
 								color.setBackground(playerSet.get("1").getColor());
 
-							} else {
+							} else if (!playerSet.get(nextP).getPlayerName().equals("Human")) {
+								//非 human 状态
+								String lastname = playerSet.get(nextP).getPlayerName()+"_"+nextP;
+								name.setText(lastname);
+								armies.setText(String.valueOf(playerSet.get(nextP).getArmy()));
+								color.setBackground(playerSet.get(nextP).getColor());
+								startupPlayer(nextP);
+							}
+							else {
+								//human 状态
 								String lastname = playerSet.get(nextP).getPlayerName()+"_"+nextP;
 								name.setText(lastname);
 								armies.setText(String.valueOf(playerSet.get(nextP).getArmy()));

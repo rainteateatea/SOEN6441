@@ -65,7 +65,7 @@ public class DominationView extends JLayeredPane implements Observer {
 		label3.setText("TotalArmy");
 		add(label3);
 
-		if (playerSet.size() > 0) {
+		
 
 			for (int i = 0; i < playerSet.size(); i++) {
 				JLabel label = new JLabel();
@@ -75,9 +75,7 @@ public class DominationView extends JLayeredPane implements Observer {
 				add(label);
 				allLables.add(label);
 			}
-		} else {
-			System.out.println("player set is 0");
-		}
+		
 	}
 
 	/**
@@ -118,7 +116,6 @@ public class DominationView extends JLayeredPane implements Observer {
 			HashMap<String, Continent> continents) {
 		// flag=true;
 		this.playerSet = players;
-		System.out.println("This is in the receive function");
 		this.continents = continents;
 		this.countries = Countries;
 
@@ -150,7 +147,7 @@ public class DominationView extends JLayeredPane implements Observer {
 		sb.append("            ");
 		sb.append(getTotalArmy(key));
 		String allInfor = sb.toString();
-		System.out.println("Information in for " + allInfor);
+		
 		return allInfor;
 	}
 
@@ -178,7 +175,7 @@ public class DominationView extends JLayeredPane implements Observer {
 		for (String key : cal.keySet()) {
 			continent = continent + key + " ";
 		}
-		System.out.println("The continent owned is " + continent);
+	
 		return continent;
 	}
 

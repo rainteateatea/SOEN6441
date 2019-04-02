@@ -57,6 +57,7 @@ public class MoveImage {
                Timer timer = new Timer(40, new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
+                    	
                         xPos += direction;
                         if (xPos + boat.getWidth() > getWidth()) {
                             xPos = getWidth() - boat.getWidth();

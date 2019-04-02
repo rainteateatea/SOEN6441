@@ -53,9 +53,10 @@ public class Graph {
 		
 		//add source to path[] 
 		pathList.add(s); 
-		
+		System.out.println("@@@");
 		//Call recursive utility 
 		printAllPathsUtil(s, d, isVisited, pathList); 
+		System.out.println("###");
 	} 
 
 	// A recursive function to print 
@@ -73,7 +74,7 @@ public class Graph {
 		
 		if (u.equals(d)&&localPathList.size()!=1)
 		{ 
-			System.out.println("@@@");
+			
 			
 			System.out.println(localPathList); 
 			
@@ -81,6 +82,7 @@ public class Graph {
 			// if match found then no need to traverse more till depth 
 			isVisited[u]= false; 
 			return ; 
+		
 		} 
 		
 		// Recur for all the vertices 
@@ -93,14 +95,15 @@ public class Graph {
 				// in path[] 
 				localPathList.add(i); 
 				printAllPathsUtil(i, d, isVisited, localPathList); 
-				
+				System.out.println("!!!"+localPathList);
 				// remove current node 
 				// in path[] 
 				localPathList.remove(i); 
+				System.out.println("@@"+localPathList);
+				break;
 			} 
 		} 
 		
-		// Mark the current node 
 		isVisited[u] = false; 
 	} 
 
@@ -119,7 +122,7 @@ public class Graph {
 		g.addEdge(10, 20);
 	
 		// arbitrary source 
-		int s = 0; 
+		int s = 1; 
 	
 		// arbitrary destination 
 		int d = 3; 

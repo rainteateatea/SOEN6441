@@ -188,7 +188,7 @@ public class EditMap extends JFrame implements Observer {
 		 */
 		public class MouseHandler extends MouseAdapter {
 			iconHandler ih = new iconHandler();
-			File image = new File(System.getProperty("user.dir") + "/resource/country.png");
+			File image = new File(System.getProperty("user.dir") + "/resource/hexagon.png");
 			int imgname = 1;
 
 			/**
