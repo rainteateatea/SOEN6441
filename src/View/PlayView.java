@@ -13,12 +13,12 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
-
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -29,7 +29,6 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.LineBorder;
-
 import Model.Attack;
 import Model.Continent;
 import Model.Country;
@@ -58,6 +57,7 @@ public class PlayView extends JFrame implements Observer {
 	public static String currentPhase;
 	public static JButton phase;
 	public static boolean WIN = false;
+	public ArrayList<JLabel> labellist = new ArrayList<>();
 	BackEnd b;
 	InitializePhase observable = new InitializePhase();
 
@@ -77,6 +77,7 @@ public class PlayView extends JFrame implements Observer {
 		countries = ((InitializePhase) obs).getCountries();
 		continents = ((InitializePhase) obs).getContinents();
 		playerSet = ((InitializePhase) obs).getPlayerSet();
+		updateLabel();
 
 	}
 
@@ -88,7 +89,7 @@ public class PlayView extends JFrame implements Observer {
 		b = new BackEnd();
 		observable.addObserver(b);
 		observable.addObserver(this);
-	//	observable.addObserver((Observer) human);
+	
 		human.setStrategy(new Human());
 		
 		EventQueue.invokeLater(new Runnable() {
@@ -122,6 +123,39 @@ public class PlayView extends JFrame implements Observer {
 
 	}
 
+	private void updateLabel() {
+		for (int i = 0; i < labellist.size(); i++) {
+			JLabel label = labellist.get(i);
+
+			
+			// update country army number
+			String[] old = label.getText().split(" ");
+			String now = old[0] + " " + countries.get(label.getName()).getArmy();
+			label.setText(now);
+			
+			// update country color
+			ImageIcon imageIcon = (ImageIcon) label.getIcon();
+			Image image = imageIcon.getImage();
+
+			BufferedImage img = (BufferedImage) image;
+			int width = img.getWidth();
+			int height = img.getHeight();
+
+			WritableRaster raster = img.getRaster();
+			for (int xx = 0; xx < width; xx++) {
+				for (int yy = 0; yy < height; yy++) {
+					int[] pixels = raster.getPixel(xx, yy, (int[]) null);
+					pixels[0] = countries.get(label.getName()).getColor().getRed();
+					pixels[1] = countries.get(label.getName()).getColor().getGreen();
+					pixels[2] = countries.get(label.getName()).getColor().getBlue();
+					raster.setPixel(xx, yy, pixels);
+				}
+
+			}
+
+		
+		}
+	}
 	/**
 	 * It is a JLayeredPane to add buttons, labels, texts. it can receive mouse
 	 * listener component.
@@ -173,6 +207,7 @@ public class PlayView extends JFrame implements Observer {
 					label.setVerticalTextPosition(JLabel.CENTER);
 					label.addMouseListener(ih);
 					label.addMouseMotionListener(ih);
+					labellist.add(label);
 					add(label);
 
 				} catch (IOException e1) {
@@ -204,12 +239,13 @@ public class PlayView extends JFrame implements Observer {
 			player.setName("player");
 			add(player);
 			name = new JLabel();
-			name.setText("1");
+			String fullname = playerSet.get("1").getPlayerName()+"_"+"1";
+			name.setText(fullname);
 			name.setName("player");
-			name.setBounds(1060, 20, 20, 25);
+			name.setBounds(1060, 20, 80, 25);
 			add(name);
 			color = new JLabel("");
-			color.setBounds(1110, 20, 25, 25);
+			color.setBounds(1130, 20, 25, 25);
 			color.setBackground(playerSet.get("1").getColor());
 			color.setOpaque(true);
 			add(color);
@@ -295,7 +331,8 @@ public class PlayView extends JFrame implements Observer {
 					JButton phase = (JButton) e.getComponent();
 					if (phase.getText().equals("Reinforcement")) {
 						System.out.println("Reinforcement");
-						armies.setText(String.valueOf(playerSet.get(name.getText()).getArmy()));
+						String[] fullname = name.getText().split("_");
+						armies.setText(String.valueOf(playerSet.get(fullname[1]).getArmy()));
 
 					} else if (phase.getText().equals("Attack")) {
 						start = true;
@@ -307,11 +344,13 @@ public class PlayView extends JFrame implements Observer {
 						
 						// earn card
 						if (WIN) {
-							observable.earnCard(name.getText());
+							String[] fullname = name.getText().split("_");
+							observable.earnCard(fullname[1]);
 						}
 						WIN = false;
 						System.out.println("Fortification, enter next phase Reinforcement, Change Player");
-						String nextP = b.findnext(name.getText());
+						String[] fullname = name.getText().split("_");
+						String nextP = b.findnext(fullname[1]);
 
 						phase.setText("Reinforcement");
 						currentPhase = "Reinforcement";
@@ -324,7 +363,8 @@ public class PlayView extends JFrame implements Observer {
 						} else {
 							armies.setText(String.valueOf(playerSet.get(nextP).getArmy()));
 						}
-						name.setText(nextP);
+						String lastname = playerSet.get(nextP).getPlayerName()+"_"+nextP;
+						name.setText(lastname);
 						color.setBackground(playerSet.get(nextP).getColor());
 
 					}
@@ -338,18 +378,19 @@ public class PlayView extends JFrame implements Observer {
 						JLabel c = (JLabel) e.getComponent();
 						
 						// check whether the player click own country
-						boolean match = rightcountry(name.getText(), c.getName());
+						String[] fullname = name.getText().split("_");
+						boolean match = rightcountry(fullname[1], c.getName());
 
 						if (match) {
-							observable.Startup(name.getText(), click);
+							observable.Startup(fullname[1], click);
 							
 							// update country army number
-							String[] old = c.getText().split(" ");
-							String now = old[0] + " " + countries.get(c.getName()).getArmy();
-							c.setText(now);
+//							String[] old = c.getText().split(" ");
+//							String now = old[0] + " " + countries.get(c.getName()).getArmy();
+//							c.setText(now);
 
 							// change player
-							String nextP = b.nextplayer(name.getText());
+							String nextP = b.nextplayer(fullname[1]);
 							if (nextP == "") {
 								
 								// get into reinforcement phase
@@ -358,12 +399,14 @@ public class PlayView extends JFrame implements Observer {
 								phase.setText("Reinforcement");
 								currentPhase = "Reinforcement";
 								observable.Reinforcement("1");
-								name.setText("1");
+								String lastname = playerSet.get("1").getPlayerName()+"_"+"1";
+								name.setText(lastname);
 								armies.setText(String.valueOf(playerSet.get("1").getArmy()));
 								color.setBackground(playerSet.get("1").getColor());
 
 							} else {
-								name.setText(nextP);
+								String lastname = playerSet.get(nextP).getPlayerName()+"_"+nextP;
+								name.setText(lastname);
 								armies.setText(String.valueOf(playerSet.get(nextP).getArmy()));
 								color.setBackground(playerSet.get(nextP).getColor());
 							}
@@ -380,15 +423,18 @@ public class PlayView extends JFrame implements Observer {
 					else if (currentPhase.equals("Reinforcement")) {
 
 						JLabel c = (JLabel) e.getComponent();
-						human.reinforcement(c,click, observable ,b);
+						String[] fullname = name.getText().split("_");
+						playerSet.get(fullname[1]).reinforcement(c, click, observable, b);
+					//	human.reinforcement(c,click, observable ,b);
 					
+				
 					}
-					
 					//////////////////////////////////
 					else if (currentPhase.equals("Attack")) {
 
 						JLabel c = (JLabel) e.getComponent();
-						boolean match = rightcountry(name.getText(), c.getName());
+						String[] fullname = name.getText().split("_");
+						boolean match = rightcountry(fullname[1], c.getName());
 						boolean isOne = b.isOne(c.getName());
 						if (start && match && isOne) {
 							from = c;
@@ -414,14 +460,16 @@ public class PlayView extends JFrame implements Observer {
 
 						if (!start && !match) {
 							boolean isNeighbour = b.Isneighbour(from.getName(), c.getName());
-							boolean self = rightcountry(name.getText(), c.getName());
+							String[] lastname = name.getText().split("_");
+							boolean self = rightcountry(lastname[1], c.getName());
 							if (isNeighbour && !self) {
 								
 								// calculate disc number
 								c.setBorder(new LineBorder(Color.ORANGE));
-							
-								human.attack(from, c, observable, b);
-							
+						//		playerSet.get(name.getText()).reinforcement(c, click, observable, b);
+						//		human.attack(from, c, observable, b);
+								String[] firstname = name.getText().split("_");
+								playerSet.get(firstname[1]).attack(from, c, observable, b);
 								
 								from = null;
 								start = true;
@@ -450,7 +498,8 @@ public class PlayView extends JFrame implements Observer {
 							new StartGame();
 
 						}
-						boolean canAttack = b.canAttack(name.getText());
+						String[] lastname = name.getText().split("_");
+						boolean canAttack = b.canAttack(lastname[1]);
 						if (!canAttack && !Attack.isWIN()) {// cannot attack enter fortification phase
 							JOptionPane.showMessageDialog(null, "you cannot attack,enter fortification phase");
 							System.out.println("enter fortification phase");
@@ -464,7 +513,8 @@ public class PlayView extends JFrame implements Observer {
 					////////////////////////////////////////
 					else if (currentPhase.equals("Fortification")) {
 						JLabel c = (JLabel) e.getComponent();
-						boolean match = rightcountry(name.getText(), c.getName());
+						String[] lastname = name.getText().split("_");
+						boolean match = rightcountry(lastname[1], c.getName());
 						if (match) {
 							if (start) {
 								from = c;
@@ -476,9 +526,9 @@ public class PlayView extends JFrame implements Observer {
 								c.setBorder(new LineBorder(Color.ORANGE));
 								String to = c.getName();
 								
-							//	fortification(from, c, to);
-								human.fortification(from, c, to, observable, b);
-							
+							//	human.fortification(from, c, to, observable, b);
+								String[] firstname = name.getText().split("_");
+								playerSet.get(firstname[1]).fortification(from, c, to, observable, b);
 								from.setBorder(null);
 								c.setBorder(null);
 								start = true;
@@ -505,6 +555,31 @@ public class PlayView extends JFrame implements Observer {
 
 		}
 
+	}
+	
+	public void setColor(String country) {
+		JLabel mark = new JLabel();
+		for(JLabel label :this.labellist) {
+			if (label.getName().equals(country)) {
+				mark = label;
+				break;
+			}
+		}
+		
+		mark.setBorder(new LineBorder(Color.ORANGE));
+	}
+	
+	public void setNull(String country) {
+		
+		JLabel mark = new JLabel();
+		for(JLabel label :this.labellist) {
+			if (label.getName().equals(country)) {
+				mark = label;
+				break;
+			}
+		}
+		
+		mark.setBorder(null);
 	}
 
 }
