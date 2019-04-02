@@ -2,13 +2,8 @@ package Model;
 
 import java.awt.*;
 import java.util.*;
-import java.util.List;
-import java.util.Map.Entry;
-
 import javax.swing.JOptionPane;
-
 import Strategy.Aggressive;
-import Strategy.BehaviorStrategy;
 import Strategy.Benevolent;
 import Strategy.Cheater;
 import Strategy.Human;
@@ -16,7 +11,8 @@ import Strategy.RandomSt;
 import View.CardView;
 
 /**
- * <h1>InitializePhase</h1> This is an initialized phase class.
+ * <h1>InitializePhase</h1> 
+ * This is an initialized phase class.
  * 
  * @author jiamin_he chenwei_song
  * @version 3.0
@@ -24,11 +20,12 @@ import View.CardView;
  */
 public class InitializePhase extends Observable {
 	private int playerNum;
-	private HashMap<String, Player> playerSet;
-	private HashMap<String, Country> countries;
+	private  HashMap<String, Player> playerSet;
+	private  HashMap<String, Country> countries;
 	private HashMap<String, Continent> continents;
 	private ArrayList<String> playerType = new ArrayList<String>();
 	private ColorList cList = new ColorList();
+	private boolean change = false;
 
 	/**
 	 * This is a constructor of initializePhase.
@@ -100,6 +97,7 @@ public class InitializePhase extends Observable {
 	public int getPlayerNum() {
 		return playerNum;
 	}
+	
 
 	/**
 	 * This method adding data to playerNum, countries, continents.
@@ -108,8 +106,7 @@ public class InitializePhase extends Observable {
 	 * @param countries  A hash map storing all countries which are in the map.
 	 * @param continents A hash map storing all continents which are in the map.
 	 */
-	public void addData(int playerNum, ArrayList<String> playlist, HashMap<String, Country> countries,
-			HashMap<String, Continent> continents) {
+	public void addData(int playerNum, ArrayList<String> playlist,HashMap<String, Country> countries, HashMap<String, Continent> continents) {
 		this.countries = countries;
 		this.continents = continents;
 		this.playerNum = playerNum;
@@ -126,10 +123,9 @@ public class InitializePhase extends Observable {
 		boolean initPlatyer = initializePlayerSet();
 		boolean initAmry = initializeArmy();
 		boolean initCount = initializeCountries();
-
+		
 		for (Map.Entry<String, Continent> cEntry : this.continents.entrySet()) {
-			System.out
-					.println("Control Value of Continent " + cEntry.getKey() + " : " + cEntry.getValue().getConvalue());
+			System.out.println("Control Value of Continent " + cEntry.getKey()+ " : " + cEntry.getValue().getConvalue());
 		}
 
 		if ((judgeNum && initPlatyer && initAmry && initCount) == true) {
@@ -153,7 +149,7 @@ public class InitializePhase extends Observable {
 			System.out.println("The number of player is greater than countries.");
 			return false;
 		} else {
-
+			
 			System.out.println("Get into initialized phase.");
 			return true;
 		}
@@ -168,10 +164,9 @@ public class InitializePhase extends Observable {
 	private boolean initializePlayerSet() {
 		LinkedList<Color> colorLinkedList = cList.getColors();
 		for (int i = 1; i <= playerNum; i++) {
-			String playName = this.playerType.get(i - 1);
+			String playName = this.playerType.get(i-1);
 			Player player = new Player(playName);
-
-//			setting player's strategy
+			//set player strategy
 			switch (playName) {
 			case "Human":
 				player.setStrategy(new Human());
@@ -192,10 +187,11 @@ public class InitializePhase extends Observable {
 				System.out.println("Get into default!!");
 				break;
 			}
-
+			
 			player.setColor(colorLinkedList.get(i - 1));// set player color
-			playerSet.put(toString().valueOf(i), player);// add player to playerSet; key is "1,2,3..."
+			playerSet.put(toString().valueOf(i), player);// add player to playerSet; key is "1,2,3..." 
 		}
+
 
 		if (playerSet.size() == playerNum) {
 			System.out.println("InitializePlayerSet success");
@@ -218,7 +214,7 @@ public class InitializePhase extends Observable {
 			armyDefault = 40;
 			break;
 		case 3:
-			armyDefault = 7;
+			armyDefault = 15;
 			break;
 		case 4:
 			armyDefault = 30;
@@ -352,6 +348,7 @@ public class InitializePhase extends Observable {
 
 	}
 
+
 	/**
 	 * This method calculating the number of reinforcement armies.
 	 *
@@ -386,6 +383,7 @@ public class InitializePhase extends Observable {
 		for (int i = 0; i < captital.size(); i++) {
 			String c = captital.get(i).getContinent();
 
+			listB.add(c);
 		}
 		for (int i = 0; i < listB.size(); i++) {
 			int temp = Collections.frequency(listB, listB.get(i));
@@ -402,12 +400,12 @@ public class InitializePhase extends Observable {
 	}
 
 	/**
-	 * This method is used to calculate army produced by cards.
-	 *
-	 * @param player  Name of player.
-	 * @param reCards Cards player hold after change cards phase.
-	 * @param change  Change cards or not.
-	 */
+     * This method is used to calculate army produced by cards.
+     *
+     * @param player Name of player.
+     * @param reCards Cards player hold after change cards phase.
+     * @param change Change cards or not.
+     */
 	public void cardArmy(String player, LinkedList<Card> reCards, boolean change) {
 		if (!change) {
 
@@ -477,14 +475,14 @@ public class InitializePhase extends Observable {
 	 * @param defender Defended country's name.
 	 * @param armies   The number of armies that player want to move.
 	 */
-//	public void attTransforArmies(String attacker, String defender, int armies) {
-//		Attack attack = new Attack(this.countries, this.continents, this.playerSet, attacker, defender);
-//		attack.transferArmy(armies);
-//		System.out.println(" Attack Phase: finished transfer armies.");
-//		setChanged();
-//		notifyObservers(this);
-//
-//	}
+	public void attTransforArmies(String attacker, String defender, int armies) {
+		Attack attack = new Attack(this.countries, this.continents, this.playerSet, attacker, defender);
+		attack.transferArmy(armies);
+		System.out.println(" Attack Phase: finished transfer armies.");
+		setChanged();
+		notifyObservers(this);
+
+	}
 
 	/**
 	 * This method a valid fortification.
@@ -506,10 +504,10 @@ public class InitializePhase extends Observable {
 	}
 
 	/**
-	 * This method is to earnCard.
-	 *
-	 * @param player Current player.
-	 */
+     * This method is to earnCard.
+     *
+     * @param player Current player.
+     */
 	public void earnCard(String player) {
 		int card = (int) (1 + Math.random() * 3);
 		Card c = new Card();
@@ -555,87 +553,49 @@ public class InitializePhase extends Observable {
 	 * The method judges these countries can transfer or not.
 	 * 
 	 * @param player The current player.
-	 * @param s      The start country.
-	 * @param d      The destination country.
+	 * @param s The start country.
+	 * @param d The destination country.
 	 * @return true if these countries can transfer.
 	 */
 	public boolean canTransfer(String player, String s, String d) {
-		int maxCountry = returnMax();
-		FindPath fp = new FindPath(maxCountry);
-		String p = player;
-		Iterator<Map.Entry<String, Country>> iterator = countries.entrySet().iterator();
-
-		// build graph
-		while (iterator.hasNext()) {
-			Map.Entry<String, Country> entry = iterator.next();
-			int from = Integer.valueOf(entry.getKey());
-			String[] clist = entry.getValue().getCountryList().split(" ");
-			for (int i = 0; i < clist.length; i++) {
-				fp.addEdge(from, Integer.valueOf(clist[i]));
-			}
-
-		}
-
-		int start = Integer.valueOf(s);
-		int end = Integer.valueOf(d);
-
-		fp.printAllPaths(start, end);
-
-		ArrayList<ArrayList<Integer>> allpath = new ArrayList<>();
-
-		String[] paths = fp.allpath.split("#");
-		for (int i = 0; i < paths.length; i++) {
-			ArrayList<Integer> onepath = new ArrayList<>();
-			String[] line = paths[i].split(" ");
-			for (int j = 0; j < line.length; j++) {
-				onepath.add(Integer.valueOf(line[j]));
-			}
-			allpath.add(onepath);
-		}
-		System.out.println(allpath);
-		boolean result = checkPath(p, allpath);
+		ArrayList<String> fromlist = new ArrayList<>();
+		HashMap<String, String> flagcountry = new HashMap<>();
+		flagcountry.put(s, s);
+		fromlist.add(s);
+		boolean result = findPath(player, fromlist, d,flagcountry);
 		return result;
 
 	}
-
-	/**
-	 * The method is to check whether exists a path that can execute transfer
-	 * method.
-	 * 
-	 * @param player The current player.
-	 * @param Path   All the path from start country to destination.
-	 * @return true If there is a path that belongs to this player.
-	 */
-	private boolean checkPath(String player, ArrayList<ArrayList<Integer>> Path) {
-		boolean isOwn = false;
-
-		String p = player;
-		for (int i = 0; i < Path.size(); i++) {
-			boolean temp = true;
-			for (int j = 0; j < Path.get(i).size(); j++) {
-				boolean isMatch = rightcountry(p, String.valueOf(Path.get(i).get(j)));
-
-				if (!isMatch) {
-					temp = false;
-
-					break;
+	
+	private boolean findPath(String player,ArrayList<String> from, String to,HashMap<String, String> flagcountry) {
+		boolean result = false;
+		ArrayList<String> templist = new ArrayList<>();
+		for (int i = 0; i < from.size(); i++) {
+			String[] countlist = countries.get(from.get(i)).getCountryList().split(" ");
+			for (int j = 0; j < countlist.length; j++) {
+				boolean isMatch = rightcountry(player, countlist[j]);
+				if (isMatch && countlist[j].equals(to)) {
+					return true;
+				}
+				else if (isMatch && !countlist[j].equals(to) &&  !flagcountry.containsKey(countlist[j])) {
+					templist.add(countlist[j]);
+					flagcountry.put(countlist[j], countlist[j]);
 				}
 			}
-			if (temp) {
-				isOwn = true;
-				break;
-
-			}
-
 		}
-
-		return isOwn;
+		if (templist.size()!=0) {
+		return	findPath(player, templist, to, flagcountry);
+		}
+		else {
+			return result;
+		}
 	}
+
 
 	/**
 	 * The method checks whether current player click right country.
 	 * 
-	 * @param cplayer  Current player.
+	 * @param cplayer Current player.
 	 * @param ccountry Current country.
 	 * @return true if the player owns the country.
 	 */
@@ -652,21 +612,11 @@ public class InitializePhase extends Observable {
 		return match;
 	}
 
-	/**
-	 * This method is to find the maximum of countries.
-	 *
-	 * @return maximum The max of countries.
-	 */
-	private int returnMax() {
-		int max = 0;
-		for (String m : countries.keySet()) {
-			int temp = countries.get(m).getName();
-			if (temp > max) {
-				max = temp;
-			}
-
-		}
-		return max + 1;
+	
+	public void doublerein(String country){
+		int army = countries.get(country).getArmy()*2;
+		countries.get(country).setArmy(army);
+		setChanged();
 	}
 
 	/**
@@ -747,7 +697,24 @@ public class InitializePhase extends Observable {
 //		notifyObservers(this);
 		return result;
 	}
+	
+	/**
+	 * This method modifies a signal for next turn.
+	 * 
+	 * @param signal 1 get into next turn and 0 stays in current turn.
+	 */
+	public void nextTurn(int signal) {
+		if (signal == 0) {
+			change = false;
+			setChanged();
+			notifyObservers(this);
+		} 
+		change = true;
+		setChanged();
+		notifyObservers(this);
+	}
 
+	
 }
 
 /**
