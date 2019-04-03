@@ -48,7 +48,7 @@ public class Cheater implements BehaviorStrategy{
 			attack(attacker, attacker, observable, b);
 		}
 		else if(!canAttack && playerSet.size()!=1){
-			System.out.println("enter fortification phase");
+			System.out.println(player+"enter fortification phase");
 			playView.phase.setText("Fortification");
 			playView.currentPhase = "Fortification";
 			//fortification phase

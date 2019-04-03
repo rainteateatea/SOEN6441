@@ -329,6 +329,21 @@ public class InitializePhase extends Observable {
 		int system = SystemArmy(player);
 		int continent = ContinentArmy(player);
 		int card = 0;
+if (!playerSet.get(player).equals("Human")) {
+			
+			String result = autoChangeCard(playerSet.get(player));
+			String[] tmp = result.split(" ");
+			card = card + Integer.parseInt(tmp[0]);
+			
+			while (Integer.parseInt(tmp[1]) == 1) {
+				
+				result = autoChangeCard(playerSet.get(player));
+				tmp = result.split(" ");
+				card = card + Integer.parseInt(tmp[0]);
+			}
+			
+		}
+		
 		playerSet.get(player).setArmy(system + continent + card);
 
 		setChanged();
@@ -490,6 +505,85 @@ public class InitializePhase extends Observable {
 
 	}
 
+	
+	/**
+	 * This method implements auto changing cards.
+	 * 
+	 * @param curPlayer Current player.
+	 * @return Result of changing cards.
+	 */
+	public String autoChangeCard(Player curPlayer) {
+
+		if (curPlayer.getCardList().size() < 3) {
+			return "0 0";
+		}
+
+		int armies = 0;
+		LinkedList<Card> newlist = new LinkedList<Card>();
+		LinkedList<Card> i = new LinkedList<Card>();
+		LinkedList<Card> c = new LinkedList<Card>();
+		LinkedList<Card> a = new LinkedList<Card>();
+
+		for (Card card : curPlayer.getCardList()) {
+			if (card.getName().equals(i)) {
+				i.add(card);
+			} else if (card.getName().equals(a)) {
+				a.add(card);
+			} else {
+				c.add(card);
+			}
+		}
+
+		if (i.size() >= 3) {
+			for (int j = 0; j < 3; j++) {
+				i.pollFirst();
+			}
+
+			armies = armies + curPlayer.getChangeCardTime() * 5;
+			curPlayer.setChangeCardTime(curPlayer.getChangeCardTime() + 1);
+		} else if (c.size() >= 3) {
+			for (int j = 0; j < 3; j++) {
+				c.pollFirst();
+			}
+
+			armies = armies + curPlayer.getChangeCardTime() * 5;
+			curPlayer.setChangeCardTime(curPlayer.getChangeCardTime() + 1);
+		} else {
+			for (int j = 0; j < 3; j++) {
+				a.pollFirst();
+			}
+
+			armies = armies + curPlayer.getChangeCardTime() * 5;
+			curPlayer.setChangeCardTime(curPlayer.getChangeCardTime() + 1);
+		}
+
+		if (i.size() != 0 && a.size() != 0 && c.size() != 0) {
+			i.pollFirst();
+			a.pollFirst();
+			c.pollFirst();
+			armies = armies + curPlayer.getChangeCardTime() * 5;
+			curPlayer.setChangeCardTime(curPlayer.getChangeCardTime() + 1);
+		}
+
+		String result = String.valueOf(armies);
+
+		newlist.addAll(i);
+		newlist.addAll(a);
+		newlist.addAll(c);
+		curPlayer.setCardList(newlist);
+
+		if (i.size() >= 3 || a.size() >= 3 || c.size() >= 3 || (i.size() != 0 && a.size() != 0 && c.size() != 0)) {
+			result = result + " " + "1";
+//			setsChanged();
+//			notifyObservers(this);
+			return result;
+		}
+
+		result = result + " " + "0";
+//		setChanged();
+//		notifyObservers(this);
+		return result;
+	}
 	/**
      * This method is to earnCard.
      *
