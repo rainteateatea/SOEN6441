@@ -5,9 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Observable;
-
 import javax.swing.JLabel;
-
 import Model.Continent;
 import Model.Country;
 import Model.InitializePhase;
@@ -15,7 +13,7 @@ import Model.Player;
 import View.BackEnd;
 import View.PlayView;
 
-public class Benevolent implements BehaviorStrategy{
+public class Benevolent implements BehaviorStrategy {
 
 	public HashMap<String, Country> countries = new HashMap<>();
 	public HashMap<String, Continent> continents = new HashMap<>();
@@ -24,31 +22,34 @@ public class Benevolent implements BehaviorStrategy{
 
 	@Override
 	public void reinforcemnet(JLabel c, String click, InitializePhase observable, BackEnd b) {
+		observable.nextTurn(0);
+		System.out.println("enter Benevolent Reinforcement phase");
 		countries = observable.getCountries();
 		continents = observable.getContinents();
 		playerSet = observable.getPlayerSet();
 		Player curPlayer = playerSet.get(playView.name.getText().split("_")[1]);
-		
+
 //		find weakest countries
-		
+
 		observable.Reinforcement(playView.name.getText().split("_")[1]);
-		
+
 		LinkedList<Country> list = new LinkedList<Country>();
 		list = findWeakCountry(curPlayer);
 		Collections.sort(list);
-		
-		while(curPlayer.getArmy() != 0) {
-			for(Country country : list) {
+
+		while (curPlayer.getArmy() != 0) {
+			for (Country country : list) {
 				if (curPlayer.getArmy() == 0) {
 					break;
 				} else {
+					System.out.println("Reinfocement country is " + country.getName());
 					playView.setColor(toString().valueOf(country.getName()));
 					observable.Startup(playView.name.getText().split("_")[1], toString().valueOf(country.getName()));
 					playView.setNull(toString().valueOf(country.getName()));
 				}
 			}
 		}
-		
+
 		if (curPlayer.getArmy() == 0) {
 			boolean canAttack = b.canAttack(playView.name.getText().split("_")[1]);
 			if (canAttack) {
@@ -64,14 +65,14 @@ public class Benevolent implements BehaviorStrategy{
 				fortification(null, null, null, observable, b);
 			}
 
-		}	
-		
+		}
+
 	}
 
 	@Override
 	public void attack(JLabel from, JLabel to, InitializePhase observable, BackEnd b) {
 		System.out.println("enter Benevolent fortification phase");
-		fortification(null, null, null, observable, b);	
+		fortification(null, null, null, observable, b);
 	}
 
 	@Override
@@ -80,34 +81,36 @@ public class Benevolent implements BehaviorStrategy{
 		continents = observable.getContinents();
 		playerSet = observable.getPlayerSet();
 		Player curPlayer = playerSet.get(playView.name.getText().split("_")[1]);
-		
+
 		Country fromCountry = innerCountry(curPlayer);
 		playView.setColor(toString().valueOf(fromCountry.getName()));
-		
+
 		LinkedList<Country> list = new LinkedList<Country>();
 		list = curPlayer.getCountryList();
 		Collections.sort(list);
-		
-		for(Country country : list) {
-			if (observable.canTransfer(playView.name.getText().split("_")[1], 
-					toString().valueOf(fromCountry.getName()), toString().valueOf(country.getName()))) {
+
+		for (Country country : list) {
+			if (observable.canTransfer(playView.name.getText().split("_")[1], toString().valueOf(fromCountry.getName()),
+					toString().valueOf(country.getName()))) {
 				playView.setColor(toString().valueOf(country.getName()));
-				observable.Fortification(toString().valueOf(fromCountry.getName()), 
-						toString().valueOf(country.getName()), fromCountry.getArmy()-1);
+				observable.Fortification(toString().valueOf(fromCountry.getName()),
+						toString().valueOf(country.getName()), fromCountry.getArmy() - 1);
+				System.out.println("Fortification : from " + fromCountry.getName() + " to " + country.getName() + " move " + (fromCountry.getArmy() - 1));
+				
 				playView.setNull(toString().valueOf(country.getName()));
 				playView.setNull(toString().valueOf(fromCountry.getName()));
 				break;
 			}
-			
+
 		}
-		
+
 		observable.nextTurn(1);
 	}
-	
+
 	private LinkedList<Country> findWeakCountry(Player player) {
 		LinkedList<Country> list = new LinkedList<Country>();
-		
-		for(Country country : player.getCountryList()) {
+
+		for (Country country : player.getCountryList()) {
 			String[] coStrings = country.getCountryList().split(" ");
 			for (int i = 0; i < coStrings.length; i++) {
 				if (!country.getColor().equals(countries.get(coStrings[i]).getColor())) {
@@ -116,13 +119,13 @@ public class Benevolent implements BehaviorStrategy{
 				}
 			}
 		}
-		
+
 		return list;
 	}
-	
-	private Country innerCountry( Player player) {
+
+	private Country innerCountry(Player player) {
 		LinkedList<Country> list = new LinkedList<Country>();
-		for(Country country : player.getCountryList()) {
+		for (Country country : player.getCountryList()) {
 			String[] coStrings = country.getCountryList().split(" ");
 			for (int i = 0; i < coStrings.length; i++) {
 				if (!country.getColor().equals(countries.get(coStrings[i]).getColor())) {
@@ -131,9 +134,9 @@ public class Benevolent implements BehaviorStrategy{
 			}
 			if (country.getArmy() > 1) {
 				list.add(country);
-			}	
+			}
 		}
-		
+
 		if (list.size() != 0) {
 			Collections.sort(list);
 			return list.peekLast();
@@ -142,7 +145,7 @@ public class Benevolent implements BehaviorStrategy{
 			Collections.sort(list);
 			return list.peekLast();
 		}
-		
+
 	}
 
 }
