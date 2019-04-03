@@ -598,43 +598,65 @@ public class InitializePhase extends Observable {
 	}
 
 	
-	public InitializePhase cheaterRein(String player, String country){
-		int army = countries.get(country).getArmy()*2;
-		countries.get(country).setArmy(army);
-		LinkedList<Country> countrylist = playerSet.get(player).getCountryList();
-		for (int i = 0; i < countrylist.size(); i++) {
-			String couname = String.valueOf(countrylist.get(i).getName());
-			if (country.equals(couname)) {
-				countrylist.get(i).setArmy(army);
-				break;
+	public InitializePhase cheaterRein(String player, ArrayList<String> country){
+		for (int i = 0; i < country.size(); i++) {
+			int army = countries.get(country.get(i)).getArmy()*2;
+			countries.get(country.get(i)).setArmy(army);
+			LinkedList<Country> countrylist = playerSet.get(player).getCountryList();
+			for (int j = 0; j < countrylist.size(); j++) {
+				String couname = String.valueOf(countrylist.get(j).getName());
+				if (country.equals(couname)) {
+					countrylist.get(j).setArmy(army);
+					break;
+				}
 			}
 		}
 		setChanged();
 		notifyObservers(this);
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return this;
 	}
-	public InitializePhase cheaterAttack(String attaker, String defender, String country) {
-		Country c = countries.get(country);
-		c.setColor(playerSet.get(attaker).getColor());
-		LinkedList<Country> atlist = playerSet.get(attaker).getCountryList();
-		atlist.add(c);
-		playerSet.get(attaker).setCountryList(atlist);
-		
-		LinkedList<Country> deList = playerSet.get(defender).getCountryList();
-		for (int i = 0; i < deList.size(); i++) {
-			if (c.getName() == deList.get(i).getName()) {
-				deList.remove(i);
-				playerSet.get(defender).setCountryList(deList);
-				break;
+	public InitializePhase cheaterAttack(HashMap<String, String> occupycou) {
+	//	cheaterAttack(String attaker, String defender, String country) {
+		for (String key: occupycou.keySet()) {
+			try {
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+			String[] information = occupycou.get(key).split("_");
+			String attaker = information[0];
+			String defender = information[1];
+			String country = key;
+			Country c = countries.get(country);
+			c.setColor(playerSet.get(attaker).getColor());
+			LinkedList<Country> atlist = playerSet.get(attaker).getCountryList();
+			atlist.add(c);
+			playerSet.get(attaker).setCountryList(atlist);
+			
+			LinkedList<Country> deList = playerSet.get(defender).getCountryList();
+			for (int j = 0; j < deList.size(); j++) {
+				if (c.getName() == deList.get(j).getName()) {
+					deList.remove(j);
+					playerSet.get(defender).setCountryList(deList);
+					break;
+				}
+			}
+			
+			if (playerSet.get(defender).getCountryList().size() == 0) {
+				playerSet.remove(defender);
+			}
+			
+			setChanged();
+			notifyObservers(this);
 		}
 		
-		if (playerSet.get(defender).getCountryList().size() == 0) {
-			playerSet.remove(defender);
-		}
-		
-		setChanged();
-		notifyObservers(this);
 		return this;
 	}
 	

@@ -153,7 +153,7 @@ public class PlayView extends JFrame implements Observer {
 			            this.count++;
 			            label.setFont(new Font("Serif", Font.BOLD, count));
 			           // System.out.println(count);
-			            if (count == 20) {
+			            if (count == 18) {
 			            	label.setFont(new Font("Serif", Font.BOLD, 12));
 			                timer.cancel();
 			            }
@@ -445,18 +445,27 @@ public class PlayView extends JFrame implements Observer {
 
 						phase.setText("Reinforcement");
 						currentPhase = "Reinforcement";
-						observable.Reinforcement(nextP);
-						if (playerSet.get(nextP).getCardList().size() != 0) {
+						
+						
+						String lastname = playerSet.get(nextP).getPlayerName()+"_"+nextP;
+						name.setText(lastname);
+						color.setBackground(playerSet.get(nextP).getColor());
+						
+						if (playerSet.get(nextP).getCardList().size() != 0 && playerSet.get(nextP).getPlayerName().equals("Human")) {
+							observable.Reinforcement(nextP);
 							observable.cardArmy(nextP, playerSet.get(nextP).getCardList(), false);
 							armies.setText(
 									"<html><body><p align=\"center\">calculating...<br/>press&nbsp;reinforcement</p></body></html>");
 
-						} else {
+						} else if(playerSet.get(nextP).getCardList().size() == 0 &&playerSet.get(nextP).getPlayerName().equals("Human")){
+							observable.Reinforcement(nextP);
 							armies.setText(String.valueOf(playerSet.get(nextP).getArmy()));
 						}
-						String lastname = playerSet.get(nextP).getPlayerName()+"_"+nextP;
-						name.setText(lastname);
-						color.setBackground(playerSet.get(nextP).getColor());
+						// next player 不是 human
+						else if (!playerSet.get(nextP).getPlayerName().equals("Human")) {
+							observable.nextTurn(1);
+						}
+						
 
 					}
 
@@ -474,12 +483,6 @@ public class PlayView extends JFrame implements Observer {
 
 						if (match) {
 							observable.Startup(fullname[1], click);
-							
-							// update country army number
-//							String[] old = c.getText().split(" ");
-//							String now = old[0] + " " + countries.get(c.getName()).getArmy();
-//							c.setText(now);
-
 							// change player
 							String nextP = b.nextplayer(fullname[1]);
 							if (nextP == "") {
@@ -566,8 +569,6 @@ public class PlayView extends JFrame implements Observer {
 								
 								// calculate disc number
 								c.setBorder(new LineBorder(Color.ORANGE));
-						//		playerSet.get(name.getText()).reinforcement(c, click, observable, b);
-						//		human.attack(from, c, observable, b);
 								String[] firstname = name.getText().split("_");
 								playerSet.get(firstname[1]).attack(from, c, observable, b);
 								
@@ -628,6 +629,7 @@ public class PlayView extends JFrame implements Observer {
 								
 							//	human.fortification(from, c, to, observable, b);
 								String[] firstname = name.getText().split("_");
+								
 								playerSet.get(firstname[1]).fortification(from, c, to, observable, b);
 								from.setBorder(null);
 								c.setBorder(null);

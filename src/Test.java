@@ -66,6 +66,15 @@ public class Test {
 //	        }
 //	    };
 //	    timer.schedule(task, 0, 1000);// 1秒一次
+		  System.out.println("@@@");
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    System.out.println("!!!!");
+		
 //		File file = new File("mapfile/");
 //		File[] files = file.listFiles();
 //		ArrayList<String> listfile = new ArrayList<>();
@@ -189,10 +198,10 @@ public class Test {
 //		      }
 	      
 	     
-		for (int i = 0; i < 20; i++) {
-			int j = (int)(0+Math.random()*7);
-			System.out.println(j);
-		}
+//		for (int i = 0; i < 20; i++) {
+//			int j = (int)(0+Math.random()*7);
+//			System.out.println(j);
+//		}
 		
 //		 attack 输入攻 守双方 骰子数界面
 //	      JPanel myPanel = new JPanel();

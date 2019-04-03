@@ -1,6 +1,7 @@
 package Strategy;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -26,28 +27,37 @@ public class Cheater implements BehaviorStrategy{
 		String[] fullname = playView.name.getText().split("_");
 		String player = fullname[1];
 		playerSet = observable.getPlayerSet();
+		ArrayList<String> countList = new ArrayList<>();
 		for (int i = 0; i < playerSet.get(player).getCountryList().size(); i++) {
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 			int country = playerSet.get(player).getCountryList().get(i).getName();
-			observable = observable.cheaterRein(player,String.valueOf(country));
-			playerSet = observable.getPlayerSet();
-			playView.armies.setText(String.valueOf(playerSet.get(player).getArmy()));
+			countList.add(String.valueOf(country));
+		//	observable = observable.cheaterRein(player,String.valueOf(country));
+		//	playerSet = observable.getPlayerSet();
+		//	playView.armies.setText(String.valueOf(playerSet.get(player).getArmy()));
 		}
+		observable = observable.cheaterRein(player, countList);
 		playerSet = observable.getPlayerSet();
 		countries = observable.getCountries();
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		boolean canAttack = canAttack(player);
 //		if (canAttack) {
 //			//attack phase
+//			System.out.println("enter Attack phase");
+//			playView.currentPhase = "Attack";
+//			playView.phase.setText("Attack");
 //			JLabel attacker = new JLabel(player);
 //			//b does not update
 //			attack(attacker, attacker, observable, b);
 //		}
 //		else {
+//			System.out.println("enter fortification phase");
+//			playView.phase.setText("Fortification");
+//			playView.currentPhase = "Fortification";
 //			//fortification phase
 //			fortification(c, c, player, observable, b);
 //		}
@@ -84,6 +94,8 @@ public class Cheater implements BehaviorStrategy{
 		//from 
 		playerSet = observable.getPlayerSet();
 		countries = observable.getCountries();
+		HashMap<String, String> occupylist = new HashMap<>();
+		//ArrayList<String> occupylist = new ArrayList<>();
 		String player = from.getText();
 		for (int i = 0; i < playerSet.get(player).getCountryList().size(); i++) {
 			String atcoun  = String.valueOf(playerSet.get(player).getCountryList().get(i).getName());
@@ -91,13 +103,26 @@ public class Cheater implements BehaviorStrategy{
 			String[] countlist = countries.get(atcoun).getCountryList().split(" ");
 			for (int j = 0; j < countlist.length; j++) {
 				String defender = b.findPlayer(countlist[j]);
+				//System.out.println("@@@"+player+" "+defender);
 				if (!player.equals(defender)) {
-					observable = observable.cheaterAttack(player, defender, countlist[j]);
+					String territy = player+"_"+defender;
+					occupylist.put(countlist[j], territy);
+				//	occupylist.add(territy);
+					//observable.cheaterAttack(player, defender, countlist[j]);
 				}
 			}
 		}
-		
-		
+		observable = observable.cheaterAttack(occupylist);
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("enter fortification phase");
+		playView.phase.setText("Fortification");
+		playView.currentPhase = "Fortification";
+	//	fortification(null, null, player, observable, b);
 		
 	}
 
@@ -108,17 +133,80 @@ public class Cheater implements BehaviorStrategy{
 		countries = observable.getCountries();
 		LinkedList<Country> atList = playerSet.get(player).getCountryList();
 		for (int i = 0; i < atList.size(); i++) {
-			String[] counlist = countries.get(atList.get(i)).getCountryList().split(" ");
-			for (int j = 0; j < counlist.length; j++) {
-				String checkplayer = findPlayer(counlist[j]);
+			String hiscountry = String.valueOf(atList.get(i).getName());
+			String[] neighbour = countries.get(hiscountry).getCountryList().split(" ");
+			for (int j = 0; j < neighbour.length; j++) {
+				String checkplayer = findPlayer(neighbour[j]);
 				if (!player.equals(checkplayer)) {
-					observable.cheaterForti(player,atList.get(i).getName());
+					observable = observable.cheaterForti(player,atList.get(i).getName());
 					break;
 				}
 			}
 		}
+		System.out.println("@@@@@@@@@@@@@@");
+		// fortification only one time enter reinforcement
+					playView.currentPhase = "Reinforcement";
+					playView.phase.setText("Reinforcement");
+					playerSet = observable.getPlayerSet();
+					String nextP = findnext(player);
+					// change player
+					String playername = playerSet.get(nextP).getPlayerName()+"_"+nextP;
+					playView.name.setText(playername);
+					playView.color.setBackground(playerSet.get(nextP).getColor());
+					
+					//next player 为 Human 并且 card army 不为0
+					if (playerSet.get(nextP).getCardList().size() != 0 && playerSet.get(nextP).getPlayerName().equals("Human")) {
+						observable.Reinforcement(nextP);
+						observable.cardArmy(nextP, playerSet.get(nextP).getCardList(), false);
+						playView.armies.setText(
+								"<html><body><p align=\"center\">calculating...<br/>press&nbsp;reinforcement</p></body></html>");
+
+					}
+					//next player 为 Human 并且 card army 为0
+					else if(playerSet.get(nextP).getCardList().size() == 0 &&playerSet.get(nextP).getPlayerName().equals("Human")){
+						observable.Reinforcement(nextP);
+						playView.armies.setText(String.valueOf(playerSet.get(nextP).getArmy()));
+					}
+					// next player 不是 human
+					else if (!playerSet.get(nextP).getPlayerName().equals("Human")) {
+						observable.nextTurn(1);
+					}
 		
-		
+	}
+	/**
+	 * This method finds who is next player.
+	 * 
+	 * @param current Current player.
+	 * @return Next player.
+	 */
+	public String findnext(String current) {
+
+		int max = maxplayer();
+		String next = String.valueOf(Integer.valueOf(current) + 1);
+		if (Integer.valueOf(current) == max) {
+			next = "1";
+		}
+		if (playerSet.containsKey(next)) {
+			return next;
+		} else {
+			return findnext(next);
+		}
+	}
+	
+	/**
+	 * This method finds the max number of player.
+	 * 
+	 * @return Player name.
+	 */
+	public int maxplayer() {
+		int max = 0;
+		for (String key : playerSet.keySet()) {
+			int temp = Integer.valueOf(key);
+			if (temp > max) {
+				max = temp;
+			}
+		}
+		return max;
 	}
 	/**
 	 * This method implements finding a player who owns current country.

@@ -10,6 +10,8 @@ import java.util.LinkedList;
 
 
 
+
+
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -206,15 +208,6 @@ public class Human implements BehaviorStrategy{
 
 			observable.Fortification(from.getName(), to, Integer.valueOf(str));
 			
-//			// update country army number
-//			String[] old = from.getText().split(" ");
-//			String now = old[0] + " " + countries.get(from.getName()).getArmy();
-//			from.setText(now);
-
-//			String[] toold = c.getText().split(" ");
-//			String tonow = toold[0] + " " + countries.get(c.getName()).getArmy();
-//			c.setText(tonow);
-			
 			// occupy a territory then obtain a card
 			if (playView.WIN) {
 				observable.earnCard(fullname[1]);
@@ -227,10 +220,17 @@ public class Human implements BehaviorStrategy{
 
 			// find next player
 			String nextP = b.findnext(fullname[1]);
-
+			System.out.println("1");
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.out.println("2");
 			// update next player armies
-			System.out.println(playerSet.get(nextP).getArmy());
-			observable.Reinforcement(nextP);
+	//		System.out.println(playerSet.get(nextP).getArmy());
+			
 			
 			// change player
 			String playername = playerSet.get(nextP).getPlayerName()+"_"+nextP;
@@ -240,6 +240,7 @@ public class Human implements BehaviorStrategy{
 
 			//next player 为 Human 并且 card army 不为0
 			if (playerSet.get(nextP).getCardList().size() != 0 && playerSet.get(nextP).getPlayerName().equals("Human")) {
+				observable.Reinforcement(nextP);
 				observable.cardArmy(nextP, playerSet.get(nextP).getCardList(), false);
 				playView.armies.setText(
 						"<html><body><p align=\"center\">calculating...<br/>press&nbsp;reinforcement</p></body></html>");
@@ -247,10 +248,14 @@ public class Human implements BehaviorStrategy{
 			}
 			//next player 为 Human 并且 card army 为0
 			else if(playerSet.get(nextP).getCardList().size() == 0 &&playerSet.get(nextP).getPlayerName().equals("Human")){
+				observable.Reinforcement(nextP);
 				playView.armies.setText(String.valueOf(playerSet.get(nextP).getArmy()));
 			}
 			// next player 不是 human
 			else if (!playerSet.get(nextP).getPlayerName().equals("Human")) {
+				System.out.println("next "+playername);
+				playView.currentPhase = "Reinforcement";
+				playView.phase.setText("Reinforcement");
 				observable.nextTurn(1);
 			}
 
