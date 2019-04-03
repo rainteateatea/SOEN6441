@@ -3,6 +3,7 @@ package Model;
 import java.awt.*;
 import java.util.*;
 
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import Strategy.Aggressive;
@@ -36,6 +37,7 @@ public class InitializePhase extends Observable {
 	public InitializePhase() {
 		this.playerSet = new HashMap<>();
 		this.playerNum = 0;
+		
 	}
 
 	/**
@@ -191,7 +193,7 @@ public class InitializePhase extends Observable {
 			}
 			
 			player.setColor(colorLinkedList.get(i - 1));// set player color
-			playerSet.put(toString().valueOf(i), player);// add player to playerSet; key is "1,2,3..." 
+			playerSet.put(String.valueOf(i), player);// add player to playerSet; key is "1,2,3..." 
 		}
 
 
@@ -611,25 +613,19 @@ public class InitializePhase extends Observable {
 				}
 			}
 		}
-		setChanged();
-		notifyObservers(this);
-		try {
-			Thread.sleep(3000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		setChanged();
+//		notifyObservers(this);
 		return this;
 	}
 	public InitializePhase cheaterAttack(HashMap<String, String> occupycou) {
 	//	cheaterAttack(String attaker, String defender, String country) {
 		for (String key: occupycou.keySet()) {
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+//			try {
+//				Thread.sleep(500);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 			String[] information = occupycou.get(key).split("_");
 			String attaker = information[0];
 			String defender = information[1];
@@ -652,11 +648,8 @@ public class InitializePhase extends Observable {
 			if (playerSet.get(defender).getCountryList().size() == 0) {
 				playerSet.remove(defender);
 			}
-			
-			setChanged();
-			notifyObservers(this);
-		}
 		
+		}
 		return this;
 	}
 	

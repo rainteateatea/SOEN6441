@@ -1,18 +1,12 @@
 package Strategy;
 
 
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
 
-
-
-
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
@@ -50,12 +44,7 @@ public class Human implements BehaviorStrategy{
 
 				if (match) {
 					observable.Startup(fullname[1], click);
-					
-					// update country army number
-//					String[] old = c.getText().split(" ");
-//					String now = old[0] + " " + countries.get(c.getName()).getArmy();
-//					c.setText(now);
-					playView.armies.setText(String.valueOf(playerSet.get(fullname[1]).getArmy()));
+					PlayView.armies.setText(String.valueOf(playerSet.get(fullname[1]).getArmy()));
 					if (playerSet.get(fullname[1]).getArmy() == 0) {
 						boolean canAttack = b.canAttack(fullname[1]);
 						if (canAttack) {
@@ -216,18 +205,10 @@ public class Human implements BehaviorStrategy{
 			
 			// fortification only one time enter reinforcement
 			playView.currentPhase = "Reinforcement";
-			playView.phase.setText("Reinforcement");
+			PlayView.phase.setText("Reinforcement");
 
 			// find next player
 			String nextP = b.findnext(fullname[1]);
-			System.out.println("1");
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			System.out.println("2");
 			// update next player armies
 	//		System.out.println(playerSet.get(nextP).getArmy());
 			
@@ -254,8 +235,6 @@ public class Human implements BehaviorStrategy{
 			// next player ²»ÊÇ human
 			else if (!playerSet.get(nextP).getPlayerName().equals("Human")) {
 				System.out.println("next "+playername);
-				playView.currentPhase = "Reinforcement";
-				playView.phase.setText("Reinforcement");
 				observable.nextTurn(1);
 			}
 

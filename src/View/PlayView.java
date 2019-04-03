@@ -33,6 +33,7 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.LineBorder;
+import javax.xml.crypto.dsig.keyinfo.PGPData;
 
 import Model.Attack;
 import Model.Continent;
@@ -79,15 +80,25 @@ public class PlayView extends JFrame implements Observer {
 
 	@Override
 	public void update(Observable obs, Object x) {
+		
 		countries = ((InitializePhase) obs).getCountries();
 		continents = ((InitializePhase) obs).getContinents();
 		playerSet = ((InitializePhase) obs).getPlayerSet();
+		
+		
 		updateLabel();
 		boolean isChange =  ((InitializePhase) obs).change;
 		if (isChange) {
 			//当前玩家不是human
+			phase.setText("Reinforcement");
 			String[] fullname = name.getText().split("_");
 			playerSet.get(fullname[1]).reinforcement(null, "", observable, b);
+		}
+		if (playerSet.size() ==1) {
+			JOptionPane.showMessageDialog(null,
+					"Congradulation!!!!player " +  name.getText() + " is winnner!!!");
+			frame.dispose();
+			new StartGame();
 		}
 		
 

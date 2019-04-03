@@ -23,6 +23,7 @@ public class Cheater implements BehaviorStrategy{
 	@Override
 	public void reinforcemnet(JLabel c, String click,
 			InitializePhase observable, BackEnd b) {
+	
 		observable.nextTurn(0);
 		String[] fullname = playView.name.getText().split("_");
 		String player = fullname[1];
@@ -31,36 +32,28 @@ public class Cheater implements BehaviorStrategy{
 		for (int i = 0; i < playerSet.get(player).getCountryList().size(); i++) {
 			int country = playerSet.get(player).getCountryList().get(i).getName();
 			countList.add(String.valueOf(country));
-		//	observable = observable.cheaterRein(player,String.valueOf(country));
-		//	playerSet = observable.getPlayerSet();
-		//	playView.armies.setText(String.valueOf(playerSet.get(player).getArmy()));
 		}
 		observable = observable.cheaterRein(player, countList);
 		playerSet = observable.getPlayerSet();
 		countries = observable.getCountries();
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		boolean canAttack = canAttack(player);
-//		if (canAttack) {
-//			//attack phase
-//			System.out.println("enter Attack phase");
-//			playView.currentPhase = "Attack";
-//			playView.phase.setText("Attack");
-//			JLabel attacker = new JLabel(player);
-//			//b does not update
-//			attack(attacker, attacker, observable, b);
-//		}
-//		else {
-//			System.out.println("enter fortification phase");
-//			playView.phase.setText("Fortification");
-//			playView.currentPhase = "Fortification";
-//			//fortification phase
-//			fortification(c, c, player, observable, b);
-//		}
+		if (canAttack) {
+			//attack phase
+			System.out.println("enter Attack phase");
+			playView.currentPhase = "Attack";
+			playView.phase.setText("Attack");
+			JLabel attacker = new JLabel(player);
+		//	observable.internalPhase(true, "Attack");
+			//b does not update
+			attack(attacker, attacker, observable, b);
+		}
+		else if(!canAttack && playerSet.size()!=1){
+			System.out.println("enter fortification phase");
+			playView.phase.setText("Fortification");
+			playView.currentPhase = "Fortification";
+			//fortification phase
+			fortification(c, c, player, observable, b);
+		}
 		
 		
 		
@@ -103,26 +96,17 @@ public class Cheater implements BehaviorStrategy{
 			String[] countlist = countries.get(atcoun).getCountryList().split(" ");
 			for (int j = 0; j < countlist.length; j++) {
 				String defender = b.findPlayer(countlist[j]);
-				//System.out.println("@@@"+player+" "+defender);
 				if (!player.equals(defender)) {
 					String territy = player+"_"+defender;
 					occupylist.put(countlist[j], territy);
-				//	occupylist.add(territy);
-					//observable.cheaterAttack(player, defender, countlist[j]);
 				}
 			}
 		}
 		observable = observable.cheaterAttack(occupylist);
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		System.out.println("enter fortification phase");
 		playView.phase.setText("Fortification");
 		playView.currentPhase = "Fortification";
-	//	fortification(null, null, player, observable, b);
+		fortification(null, null, player, observable, b);
 		
 	}
 
@@ -143,7 +127,6 @@ public class Cheater implements BehaviorStrategy{
 				}
 			}
 		}
-		System.out.println("@@@@@@@@@@@@@@");
 		// fortification only one time enter reinforcement
 					playView.currentPhase = "Reinforcement";
 					playView.phase.setText("Reinforcement");
