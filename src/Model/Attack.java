@@ -273,13 +273,13 @@ public class Attack {
 	 * @param countryName Current country name.
 	 * @return The player who owns current country.
 	 */
-	public Player findPlayer(String countryName) {
+	public String findPlayer(String countryName) {
 
 		Country country = countries.get(countryName);
 		Color color = country.getColor();
 		for (Map.Entry<String, Player> entry : playerSet.entrySet()) {
 			if (entry.getValue().getColor().equals(color)) {
-				return entry.getValue();
+				return entry.getKey();
 			}
 		}
 		System.out.println("Cannot find the player!!!");
@@ -490,7 +490,7 @@ public class Attack {
 					+ countries.get(defendCountry).getArmy());
 			if (countries.get(defendCountry).getArmy() == 0) {
 				System.out.println("Winner is attacker.");
-				return findPlayer(attackCountry).getPlayerName();
+				return findPlayer(attackCountry);
 			} else {// modify
 				int a = att - countries.get(attackCountry).getArmy();
 				int d = def - countries.get(defendCountry).getArmy();
@@ -500,17 +500,17 @@ public class Attack {
 					return "-1";
 				} else if (a > d) {
 					System.out.println("Winner is defender.");
-					return findPlayer(defendCountry).getPlayerName();
+					return findPlayer(defendCountry);
 				} else {
 					System.out.println("Winner is attacker.");
-					return findPlayer(attackCountry).getPlayerName();
+					return findPlayer(attackCountry);
 				}
 			}
 		case "All_Out":
 			if (countries.get(defendCountry).getArmy() == 0) {
-				return findPlayer(attackCountry).getPlayerName();
+				return findPlayer(attackCountry);
 			} else if (countries.get(attackCountry).getArmy() == 1) {
-				return findPlayer(defendCountry).getPlayerName();
+				return findPlayer(defendCountry);
 			}
 		default:
 			System.out.println("Find winner failure!");
@@ -559,8 +559,10 @@ public class Attack {
 
 //		attacker can get a card;
 		this.HAS_CARD = true;
-		Player attPlayer = findPlayer(attackCountry);
-		Player defPlayer = findPlayer(defendCountry);
+		String attName = findPlayer(attackCountry);
+		String defName = findPlayer(defendCountry);
+		Player attPlayer = playerSet.get(attName);
+		Player defPlayer = playerSet.get(defName);
 		
 //		updating attacker and defender card List
 		System.out.println("Player" + attPlayer.getPlayerName()+ " cards: "  + attPlayer.getCardList().size());
@@ -596,25 +598,33 @@ public class Attack {
 		Country country = countries.get(defendCountry);
 		country.setColor(countries.get(attackCountry).getColor());
 
-		LinkedList<Country> list = playerSet.get(attPlayer.getPlayerName()).getCountryList();
+		LinkedList<Country> list = playerSet.get(attName).getCountryList();
 		list.add(country);
-		playerSet.get(attPlayer.getPlayerName()).setCountryList(list);
+		playerSet.get(attName).setCountryList(list);
 
 		for (Country c : defPlayer.getCountryList()) {// update defender
 			if (c.getName() == country.getName()) {
-				LinkedList<Country> deff = playerSet.get(defPlayer.getPlayerName()).getCountryList();
+				LinkedList<Country> deff = playerSet.get(defName).getCountryList();
 				deff.remove(c);
-				playerSet.get(defPlayer.getPlayerName()).setCountryList(deff);
+				playerSet.get(defName).setCountryList(deff);
 				break;
 			}
 		}
-
-		if (range[0] == 0 && range[1] > 0) {
+		
+		String curplayer = findPlayer(attName);
+		if (playerSet.get(curplayer).getPlayerName().equals("Agressive")) {
+			if (range[0] == 0 && range[1] > 0) {
+				transferArmy(1);
+			}
+		} else {
+			
+			if (range[0] == 0 && range[1] > 0) {
 			transferArmy(range[1]);
+			}
 		}
 
 		if (defPlayer.getCountryList().size() == 0) {
-			playerSet.remove(defPlayer.getPlayerName());
+			playerSet.remove(defName);
 		}
 
 		if (playerSet.size() == 1) {
