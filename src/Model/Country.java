@@ -11,7 +11,7 @@ import java.awt.Point;
  * @version 3.0
  * @since 2019-02-28
  */
-public class Country {
+public class Country implements Comparable<Country>{
 	private int name;
 	private Point location;
 	private int army;
@@ -159,6 +159,22 @@ public class Country {
 	 */
 	public void setCountryList(String countryList) {
 		this.countryList = countryList;
+	}
+
+	/**
+	 * This method implements countries comparison.
+	 * 
+	 * @param o A country object.
+	 */
+	@Override
+	public int compareTo(Country o) {
+		if (this.army > o.army) {
+			return 1;
+		} else if (this.army < o.army) {
+			return -1;
+		} else {
+			return 0;
+		}	
 	}
 	
 
