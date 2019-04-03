@@ -38,9 +38,9 @@ public class RandomSt implements BehaviorStrategy {
 	 */
 	@Override
 	public void reinforcemnet(JLabel c, String click, InitializePhase observable, BackEnd b) {
-		
-//		observable.nextTurn(0);
-		
+
+		observable.nextTurn(0);
+
 		countries = observable.getCountries();
 		continents = observable.getContinents();
 		playerSet = observable.getPlayerSet();
@@ -108,17 +108,17 @@ public class RandomSt implements BehaviorStrategy {
 			String[] canTransfer = tmp.split(" ");
 			if (Integer.parseInt(canTransfer[2]) != 0) {
 				capture = true;
-			} 
+			}
 		}
-		
+
 //		updating information and transfer armies
 		String[] record = tmp.split(" ");
 		if (tmp == "") {
-			
+
 			playView.setNull(att);
 			playView.setNull(def);
 			fortification(null, null, null, observable, b);
-			
+
 		} else {
 			if (!record[1].equals("0")) {
 				int armies = randomArimes(Integer.parseInt(record[1]), Integer.parseInt(record[2]));
@@ -127,54 +127,55 @@ public class RandomSt implements BehaviorStrategy {
 				playView.setNull(def);
 				fortification(null, null, null, observable, b);
 			}
-			
+
 			playView.setNull(att);
 			playView.setNull(def);
 			fortification(null, null, null, observable, b);
 		}
-		
+
 	}
 
 	@Override
 	public void fortification(JLabel from, JLabel c, String to, InitializePhase observable, BackEnd b) {
-		
+
 		countries = observable.getCountries();
 		continents = observable.getContinents();
 		playerSet = observable.getPlayerSet();
 		Player curPlayer = playerSet.get(playView.name.getText().split("_")[1]);
-		
-		LinkedList<Country> cantransferCountries= new LinkedList<Country>();
-		for(Country country : curPlayer.getCountryList()) {
+
+		LinkedList<Country> cantransferCountries = new LinkedList<Country>();
+		for (Country country : curPlayer.getCountryList()) {
 			if (country.getArmy() > 1) {
 				cantransferCountries.add(country);
 			}
 		}
-		
+
 		Random random = new Random();
 		int index = random.nextInt(cantransferCountries.size());
 		Country fromCountry = cantransferCountries.get(index);
 		playView.setColor(toString().valueOf(fromCountry.getName()));
 		cantransferCountries.clear();
-		
-		for(Country country : curPlayer.getCountryList()){
-			if ((country.getName() != fromCountry.getName()) && observable.canTransfer(playView.name.getText().split("_")[1], 
-					toString().valueOf(fromCountry.getName()), toString().valueOf(country.getName()))) {
-				cantransferCountries.add(country);			
+
+		for (Country country : curPlayer.getCountryList()) {
+			if ((country.getName() != fromCountry.getName())
+					&& observable.canTransfer(playView.name.getText().split("_")[1],
+							toString().valueOf(fromCountry.getName()), toString().valueOf(country.getName()))) {
+				cantransferCountries.add(country);
 			}
 		}
-		
+
 		index = random.nextInt(cantransferCountries.size());
 		Country toCountry = cantransferCountries.get(index);
 		playView.setColor(toString().valueOf(toCountry.getName()));
-		
-		int armires = randomArimes(1, fromCountry.getArmy()-1);
-		
-		observable.Fortification(toString().valueOf(fromCountry.getName()), 
-				toString().valueOf(toCountry.getName()), armires);	
+
+		int armires = randomArimes(1, fromCountry.getArmy() - 1);
+
+		observable.Fortification(toString().valueOf(fromCountry.getName()), toString().valueOf(toCountry.getName()),
+				armires);
 		playView.setNull(toString().valueOf(fromCountry.getName()));
 		playView.setColor(toString().valueOf(toCountry.getName()));
 		observable.nextTurn(1);
-		
+
 	}
 
 	/**
@@ -293,7 +294,7 @@ public class RandomSt implements BehaviorStrategy {
 	 * This method obtains a random number of armies.
 	 * 
 	 * @param from The number of dices.
-	 * @param to The maximum number of armies can be chosen.
+	 * @param to   The maximum number of armies can be chosen.
 	 * @return The number of armies will be transfered.
 	 */
 	public int randomArimes(int from, int to) {

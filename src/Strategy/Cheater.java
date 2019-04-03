@@ -39,16 +39,17 @@ public class Cheater implements BehaviorStrategy{
 		playerSet = observable.getPlayerSet();
 		countries = observable.getCountries();
 		boolean canAttack = canAttack(player);
-//		if (canAttack) {
-//			//attack phase
-//			JLabel attacker = new JLabel(player);
-//			//b does not update
-//			attack(attacker, attacker, observable, b);
-//		}
-//		else {
-//			//fortification phase
-//			fortification(c, c, player, observable, b);
-//		}
+		
+		if (canAttack) {
+			//attack phase
+			JLabel attacker = new JLabel(player);
+			//b does not update
+			attack(attacker, attacker, observable, b);
+		}
+		else {
+			//fortification phase
+			fortification(c, c, player, observable, b);
+		}
 		
 		
 		

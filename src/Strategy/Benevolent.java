@@ -103,7 +103,6 @@ public class Benevolent implements BehaviorStrategy {
 			}
 
 		}
-
 		observable.nextTurn(1);
 	}
 
@@ -124,6 +123,7 @@ public class Benevolent implements BehaviorStrategy {
 	}
 
 	private Country innerCountry(Player player) {
+		
 		LinkedList<Country> list = new LinkedList<Country>();
 		for (Country country : player.getCountryList()) {
 			String[] coStrings = country.getCountryList().split(" ");
