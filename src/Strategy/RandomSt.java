@@ -39,6 +39,7 @@ public class RandomSt implements BehaviorStrategy {
 	@Override
 	public void reinforcemnet(JLabel c, String click, InitializePhase observable, BackEnd b) {
 
+//		random get a country and adding all armies in this country
 		observable.nextTurn(0);
 
 		countries = observable.getCountries();
@@ -50,12 +51,13 @@ public class RandomSt implements BehaviorStrategy {
 		Random random = new Random();
 		int index = random.nextInt(curPlayer.getCountryList().size());
 		Country country = curPlayer.getCountryList().get(index);
-		playView.setColor(toString().valueOf(country.getName()));
 
 //		invoking startUp
 		while (curPlayer.getArmy() != 0) {
 			observable.Startup(playView.name.getText().split("_")[1], toString().valueOf(country.getName()));
 		}
+
+		System.out.println("Reinfocement country is " + country.getName());
 
 		if (curPlayer.getArmy() == 0) {
 			boolean canAttack = b.canAttack(playView.name.getText().split("_")[1]);
@@ -63,14 +65,14 @@ public class RandomSt implements BehaviorStrategy {
 
 				// enter attack phase
 				System.out.println("enter Random Attack phase");
-				playView.setNull(toString().valueOf(country.getName()));
+
 				attack(null, null, observable, b);
 
 			} else {
 
 				// cannot attack enter fortification phase
 				System.out.println("enter Random fortification phase");
-				playView.setNull(toString().valueOf(country.getName()));
+
 				fortification(null, null, null, observable, b);
 			}
 
@@ -91,13 +93,12 @@ public class RandomSt implements BehaviorStrategy {
 		String[] info = result.split(" ");
 		String att = info[0];
 		String def = info[1];
-		playView.setColor(att);
-		playView.setColor(def);
 
 //		judge attack or not
-
 		Random isAttack = new Random();
 		String tmp = "";
+
+//		if random is false then not attack
 		while (isAttack.nextBoolean() && (countries.get(att).getArmy() != 1) && (!capture)) {
 
 			int[] dices = findDicesNum(att, def);
@@ -105,6 +106,9 @@ public class RandomSt implements BehaviorStrategy {
 			int defD = dices[1];
 			tmp = observable.attackPhase(att, def, "One_Time", attD, defD);
 
+			System.out.println("Att is : " + att + " Def is " + def);
+
+//			if defender is captured, set capture is "true"
 			String[] canTransfer = tmp.split(" ");
 			if (Integer.parseInt(canTransfer[2]) != 0) {
 				capture = true;
@@ -113,25 +117,18 @@ public class RandomSt implements BehaviorStrategy {
 
 //		updating information and transfer armies
 		String[] record = tmp.split(" ");
-		if (tmp == "") {
+		if (!record[1].equals("0")) {
+			int armies = randomArimes(Integer.parseInt(record[1]), Integer.parseInt(record[2]));
+			observable.Fortification(att, def, armies);
 
-			playView.setNull(att);
-			playView.setNull(def);
-			fortification(null, null, null, observable, b);
+			System.out.println("Random transfer armies from " + att + " to " + def + " armies: " + armies);
 
-		} else {
-			if (!record[1].equals("0")) {
-				int armies = randomArimes(Integer.parseInt(record[1]), Integer.parseInt(record[2]));
-				observable.Fortification(att, def, armies);
-				playView.setNull(att);
-				playView.setNull(def);
-				fortification(null, null, null, observable, b);
-			}
-
-			playView.setNull(att);
-			playView.setNull(def);
+			System.out.println("Get into Random fortification: ");
 			fortification(null, null, null, observable, b);
 		}
+
+		System.out.println("Get into Random fortification: ");
+		fortification(null, null, null, observable, b);
 
 	}
 
@@ -143,6 +140,7 @@ public class RandomSt implements BehaviorStrategy {
 		playerSet = observable.getPlayerSet();
 		Player curPlayer = playerSet.get(playView.name.getText().split("_")[1]);
 
+//		a country can transfer which must hold more than 1 armies
 		LinkedList<Country> cantransferCountries = new LinkedList<Country>();
 		for (Country country : curPlayer.getCountryList()) {
 			if (country.getArmy() > 1) {
@@ -150,30 +148,45 @@ public class RandomSt implements BehaviorStrategy {
 			}
 		}
 
+//		get a random country which can transfer armies
 		Random random = new Random();
 		int index = random.nextInt(cantransferCountries.size());
 		Country fromCountry = cantransferCountries.get(index);
-		playView.setColor(toString().valueOf(fromCountry.getName()));
 		cantransferCountries.clear();
 
 		for (Country country : curPlayer.getCountryList()) {
-			if ((country.getName() != fromCountry.getName())
+			if ((country.getName() != fromCountry.getName())// cannot self-transfer..
 					&& observable.canTransfer(playView.name.getText().split("_")[1],
 							toString().valueOf(fromCountry.getName()), toString().valueOf(country.getName()))) {
 				cantransferCountries.add(country);
 			}
 		}
 
-		index = random.nextInt(cantransferCountries.size());
-		Country toCountry = cantransferCountries.get(index);
-		playView.setColor(toString().valueOf(toCountry.getName()));
+		if (cantransferCountries.size() == 0) {
+			
+			System.out.println("Random country with no path to transfer");
+			
+		} else {
+			
+//			trandfer random armies to target country
+			index = random.nextInt(cantransferCountries.size());
+			Country toCountry = cantransferCountries.get(index);
+			
+			int armires = 0;
+			if (fromCountry.getArmy() == 2) {
+				armires = 1;
+			}else {
+				armires = randomArimes(1, fromCountry.getArmy() - 1);
+			}
+			
+			observable.Fortification(toString().valueOf(fromCountry.getName()), toString().valueOf(toCountry.getName()),
+					armires);
 
-		int armires = randomArimes(1, fromCountry.getArmy() - 1);
+			System.out.println("Random fortification from : " + fromCountry.getName() + " to : " + toCountry.getName()
+					+ " armies : " + armires);
 
-		observable.Fortification(toString().valueOf(fromCountry.getName()), toString().valueOf(toCountry.getName()),
-				armires);
-		playView.setNull(toString().valueOf(fromCountry.getName()));
-		playView.setColor(toString().valueOf(toCountry.getName()));
+		}
+
 		observable.nextTurn(1);
 
 	}
@@ -202,8 +215,11 @@ public class RandomSt implements BehaviorStrategy {
 			Random random = new Random();
 			int index = random.nextInt(checkList.size());
 
+//			check a random country whether can be an attacker or not. Checking its neightbour countries
 			ArrayList<String> list = checkValidAtt(index, checkList, player);
 
+//			if list size is 0; means random country cannot be an attacker; then find next one
+//			else this random country can be an attack and find defender
 			if (list.size() == 0) {
 
 				checkList.remove(index);
@@ -212,14 +228,20 @@ public class RandomSt implements BehaviorStrategy {
 
 				result = result + toString().valueOf(checkList.get(index).getName()) + " ";
 				att = true;
-				int i = random.nextInt(list.size());
-				result = result + list.get(i);
-				def = true;
+				if (list.size() == 1) {// list size is one, do not need to random
+					result = result + list.get(0);
+					def = true;
+				} else { // list size is greater than 1, then random get a defender
+					int i = random.nextInt(list.size());
+					result = result + list.get(i);
+					def = true;
+				}
+
 			}
 
 		}
 
-		if (att && def) {
+		if (att && def) { // result format is (attacker" "defender)
 
 			return result;
 
@@ -238,9 +260,9 @@ public class RandomSt implements BehaviorStrategy {
 	 */
 	private ArrayList<String> checkValidAtt(int index, LinkedList<Country> check, String player) {
 
-		Country curCountry = check.get(index);
-		String[] adj = curCountry.getCountryList().split(" ");
-		ArrayList<String> list = new ArrayList<String>();
+		Country curCountry = check.get(index);// attack country
+		String[] adj = curCountry.getCountryList().split(" "); // all its neighbors
+		ArrayList<String> list = new ArrayList<String>(); // storing all countries which can be a defender country
 
 		for (String tmp : adj) {
 			if (!countries.get(tmp).getColor().equals(playerSet.get(player).getColor())) {
