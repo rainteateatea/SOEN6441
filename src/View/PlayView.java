@@ -169,9 +169,11 @@ public class PlayView extends JFrame implements Observer {
 			        public void run() {
 			            this.count++;
 			            label.setFont(new Font("Serif", Font.BOLD, count));
+			            label.setForeground(Color.RED);
 			           // System.out.println(count);
 			            if (count == 18) {
 			            	label.setFont(new Font("Serif", Font.BOLD, 12));
+			            	 label.setForeground(Color.BLACK);
 			                timer.cancel();
 			            }
 			        }

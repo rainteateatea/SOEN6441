@@ -137,7 +137,7 @@ public class Cheater implements BehaviorStrategy{
 					playView.name.setText(playername);
 					playView.color.setBackground(playerSet.get(nextP).getColor());
 					
-					//next player 为 Human 并且 card army 不为0
+					//next player is Human and card army != 0
 					if (playerSet.get(nextP).getCardList().size() != 0 && playerSet.get(nextP).getPlayerName().equals("Human")) {
 						observable.Reinforcement(nextP);
 						observable.cardArmy(nextP, playerSet.get(nextP).getCardList(), false);
@@ -145,12 +145,12 @@ public class Cheater implements BehaviorStrategy{
 								"<html><body><p align=\"center\">calculating...<br/>press&nbsp;reinforcement</p></body></html>");
 
 					}
-					//next player 为 Human 并且 card army 为0
+					//next player is Human and card army ==0
 					else if(playerSet.get(nextP).getCardList().size() == 0 &&playerSet.get(nextP).getPlayerName().equals("Human")){
 						observable.Reinforcement(nextP);
 						playView.armies.setText(String.valueOf(playerSet.get(nextP).getArmy()));
 					}
-					// next player 不是 human
+					// next player is not human
 					else if (!playerSet.get(nextP).getPlayerName().equals("Human")) {
 						observable.nextTurn(1);
 					}

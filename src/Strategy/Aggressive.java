@@ -46,7 +46,7 @@ public class Aggressive implements BehaviorStrategy {
 			if (canAttack) {
 
 				// enter attack phase
-				System.out.println(fullname +" enter Aggressive Attack phase");
+				System.out.println( playView.name.getText() +" enter Aggressive Attack phase");
 				PlayView.phase.setText("Attack");
 				PlayView.currentPhase = "Attack";
 				JLabel p = new JLabel();
@@ -57,7 +57,7 @@ public class Aggressive implements BehaviorStrategy {
 			} else {
 
 				// cannot attack enter fortification phases
-				System.out.println("enter Aggressive fortification phase");
+				System.out.println( playView.name.getText()+"enter Aggressive fortification phase");
 				fortification(null, null, null, observable, b);
 			}
 		}
@@ -78,7 +78,7 @@ public class Aggressive implements BehaviorStrategy {
 				break;
 			}
 			if (!player.equals(defender)) {
-				
+				System.out.println("Aggressive_"+player+"uses country"+atcountry+" to attack country"+defender);
 				String canTransfer = observable.attackPhase(player, defender, "All_Out", 0, 0);
 				String record[] = canTransfer.split(" ");
 				if (record[0].equals(player)) {//winner is attacker
@@ -100,7 +100,7 @@ public class Aggressive implements BehaviorStrategy {
 //		use strongest country to attack until it cannot attack anymore
 		
 		
-		System.out.println("enter Aggressive fortification phase");
+		System.out.println( playView.name.getText()+" enter Aggressive fortification phase");
 		fortification(null, null, null, observable, b);
 		
 	}
@@ -112,7 +112,8 @@ public class Aggressive implements BehaviorStrategy {
 		continents = observable.getContinents();
 		playerSet = observable.getPlayerSet();
 		Player curPlayer = playerSet.get(playView.name.getText().split("_")[1]);
-
+		String[] fullname = playView.name.getText().split("_");
+		String player = fullname[1];
 		LinkedList<Country> list = new LinkedList<Country>(curPlayer.getCountryList());
 		Collections.sort(list);
 		
@@ -123,6 +124,8 @@ public class Aggressive implements BehaviorStrategy {
 			if (findTransferCountry(curPlayer, strongestCountry, observable) != null) {
 				Country fromCountry = findTransferCountry(curPlayer, strongestCountry, observable);
 			
+				System.out.println(playView.name.getText()+"move "+ (fromCountry.getArmy()-1)+"armies from"
+				+fromCountry.getName()+" to "+strongestCountry.getName());
 				
 				observable.Fortification(String.valueOf(fromCountry.getName()), 
 						String.valueOf(strongestCountry.getName()), fromCountry.getArmy()-1);
@@ -130,7 +133,33 @@ public class Aggressive implements BehaviorStrategy {
 			}
 		}
 		
-		observable.nextTurn(1);
+		// fortification only one time enter reinforcement
+		playView.currentPhase = "Reinforcement";
+		playView.phase.setText("Reinforcement");
+		playerSet = observable.getPlayerSet();
+		String nextP = b.findnext(player);
+		// change player
+		String playername = playerSet.get(nextP).getPlayerName()+"_"+nextP;
+		playView.name.setText(playername);
+		playView.color.setBackground(playerSet.get(nextP).getColor());
+		
+		//next player is Human and card army != 0
+		if (playerSet.get(nextP).getCardList().size() != 0 && playerSet.get(nextP).getPlayerName().equals("Human")) {
+			observable.Reinforcement(nextP);
+			observable.cardArmy(nextP, playerSet.get(nextP).getCardList(), false);
+			playView.armies.setText(
+					"<html><body><p align=\"center\">calculating...<br/>press&nbsp;reinforcement</p></body></html>");
+
+		}
+		//next player is Human and card army ==0
+		else if(playerSet.get(nextP).getCardList().size() == 0 &&playerSet.get(nextP).getPlayerName().equals("Human")){
+			observable.Reinforcement(nextP);
+			playView.armies.setText(String.valueOf(playerSet.get(nextP).getArmy()));
+		}
+		// next player is not human
+		else if (!playerSet.get(nextP).getPlayerName().equals("Human")) {
+			observable.nextTurn(1);
+		}
 	}
 
 	private String Strongest(String player) {
@@ -175,13 +204,13 @@ public class Aggressive implements BehaviorStrategy {
 		list.remove(country);
 		Country testCountry = list.pollLast();
 		
-		while (!observable.canTransfer(pName, toString().valueOf(country.getName()), 
-				toString().valueOf(testCountry.getName())) && (list.size() != 0) && (testCountry.getArmy() == 1)) {
+		while (!observable.canTransfer(pName, String.valueOf(country.getName()), 
+				String.valueOf(testCountry.getName())) && (list.size() != 0) && (testCountry.getArmy() == 1)) {
 			testCountry = list.pollLast();	
 		}
 		
-		if (observable.canTransfer(pName, toString().valueOf(country.getName()), 
-				toString().valueOf(testCountry.getName())) && list.size() == 0) {
+		if (observable.canTransfer(pName, String.valueOf(country.getName()), 
+				String.valueOf(testCountry.getName())) && list.size() == 0) {
 			return testCountry;
 		} else if (list.size() != 0) {
 			return testCountry;

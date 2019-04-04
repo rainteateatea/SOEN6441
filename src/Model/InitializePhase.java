@@ -329,7 +329,7 @@ public class InitializePhase extends Observable {
 		int system = SystemArmy(player);
 		int continent = ContinentArmy(player);
 		int card = 0;
-if (!playerSet.get(player).equals("Human")) {
+		if (!playerSet.get(player).equals("Human")) {
 			
 			String result = autoChangeCard(playerSet.get(player));
 			String[] tmp = result.split(" ");
