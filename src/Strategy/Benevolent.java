@@ -149,7 +149,7 @@ public class Benevolent implements BehaviorStrategy {
 	 * @return Next player.
 	 */
 	private String findnext(String current) {
-
+		
 		int max = maxplayer();
 		String next = String.valueOf(Integer.valueOf(current) + 1);
 		if (Integer.valueOf(current) == max) {

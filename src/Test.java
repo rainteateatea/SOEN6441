@@ -50,7 +50,14 @@ public class Test {
 	
 	
 	public static void main(String args[]) {
-		
+		int[] a = {2,7,3,1,5,6};
+		int temp = a[0];
+		for (int i = 1; i < a.length; i++) {
+			if (temp >a[i]) {
+				temp = a[i];
+			}
+		}
+		System.out.println(temp);
 //		final Timer timer = new Timer();
 //	    TimerTask task = new TimerTask() {
 //	        private int count;
@@ -66,15 +73,15 @@ public class Test {
 //	        }
 //	    };
 //	    timer.schedule(task, 0, 1000);// 1√Î“ª¥Œ
-		  System.out.println("@@@");
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	    System.out.println("!!!!");
-		
+//		  System.out.println("@@@");
+//		try {
+//			Thread.sleep(2000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	    System.out.println("!!!!");
+//		
 //		File file = new File("mapfile/");
 //		File[] files = file.listFiles();
 //		ArrayList<String> listfile = new ArrayList<>();
