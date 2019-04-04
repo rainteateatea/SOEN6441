@@ -87,6 +87,12 @@ public class PlayView extends JFrame implements Observer {
 		
 		
 		updateLabel();
+		try {
+		Thread.sleep(500);
+	} catch (InterruptedException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
 		boolean isChange =  ((InitializePhase) obs).change;
 		if (isChange) {
 			//当前玩家不是human

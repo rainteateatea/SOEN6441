@@ -601,7 +601,10 @@ if (!playerSet.get(player).equals("Human")) {
 			list = playerSet.get(player).getCardList();
 			list.add(c);
 			playerSet.get(player).setCardList(list);
-			JOptionPane.showMessageDialog(null, "you got infantry card");
+			if (playerSet.get(player).getPlayerName().equals("Human")) {
+				JOptionPane.showMessageDialog(null, "you got infantry card");
+			}
+			System.out.println(player+" you got infantry card");
 			break;
 		case 2:
 
@@ -611,7 +614,10 @@ if (!playerSet.get(player).equals("Human")) {
 			list.add(c);
 
 			playerSet.get(player).setCardList(list);
+			if (playerSet.get(player).getPlayerName().equals("Human")) {
 			JOptionPane.showMessageDialog(null, "you got cavalry card");
+			}
+			System.out.println(player+" you got cavalry card");
 			break;
 		case 3:
 
@@ -621,7 +627,10 @@ if (!playerSet.get(player).equals("Human")) {
 			list.add(c);
 
 			playerSet.get(player).setCardList(list);
+			if (playerSet.get(player).getPlayerName().equals("Human")) {
 			JOptionPane.showMessageDialog(null, "you got artillery card");
+			}
+			System.out.println(player+" you got artillery card");
 			break;
 
 		}
@@ -712,7 +721,6 @@ if (!playerSet.get(player).equals("Human")) {
 		return this;
 	}
 	public InitializePhase cheaterAttack(HashMap<String, String> occupycou) {
-	//	cheaterAttack(String attaker, String defender, String country) {
 		for (String key: occupycou.keySet()) {
 //			try {
 //				Thread.sleep(500);

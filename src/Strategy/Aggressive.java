@@ -46,7 +46,9 @@ public class Aggressive implements BehaviorStrategy {
 			if (canAttack) {
 
 				// enter attack phase
-				System.out.println("enter Aggressive Attack phase");
+				System.out.println(fullname +" enter Aggressive Attack phase");
+				PlayView.phase.setText("Attack");
+				PlayView.currentPhase = "Attack";
 				JLabel p = new JLabel();
 				p.setText(player);
 				p.setName(strong);
@@ -66,16 +68,34 @@ public class Aggressive implements BehaviorStrategy {
 		countries = observable.getCountries();
 		continents = observable.getContinents();
 		playerSet = observable.getPlayerSet();
+		boolean win = false;
 		String player = playcountry.getText();
 		String atcountry = playcountry.getName();
 		String[] defcountry = countries.get(atcountry).getCountryList().split(" ");
 		for (int i = 0; i < defcountry.length; i++) {
 			String defender = b.findPlayer(defcountry[i]);
-			if (!player.equals(defender) && countries.get(atcountry).getArmy()!= 1) {
-				
-				observable.attackPhase(player, defender, "All_Out", 0, 0);
+			if (countries.get(atcountry).getArmy()== 1) {
+				break;
 			}
+			if (!player.equals(defender)) {
+				
+				String canTransfer = observable.attackPhase(player, defender, "All_Out", 0, 0);
+				String record[] = canTransfer.split(" ");
+				if (record[0].equals(player)) {//winner is attacker
+					win = true;
+					if (!record[1].equals("0")) {
+						observable.Fortification(atcountry, defcountry[i], Integer.valueOf(record[1]));
+					}
+					
+				}
+			}
+			
 		}
+		if(win){
+			observable.earnCard(player);
+		}
+		
+		
 
 //		use strongest country to attack until it cannot attack anymore
 		
@@ -104,8 +124,8 @@ public class Aggressive implements BehaviorStrategy {
 				Country fromCountry = findTransferCountry(curPlayer, strongestCountry, observable);
 			
 				
-				observable.Fortification(toString().valueOf(fromCountry.getName()), 
-						toString().valueOf(strongestCountry.getName()), fromCountry.getArmy()-1);
+				observable.Fortification(String.valueOf(fromCountry.getName()), 
+						String.valueOf(strongestCountry.getName()), fromCountry.getArmy()-1);
 				break;
 			}
 		}
@@ -115,7 +135,6 @@ public class Aggressive implements BehaviorStrategy {
 
 	private String Strongest(String player) {
 		LinkedList<Country> candidates = playerSet.get(player).getCountryList();
-		Color playerColor  = playerSet.get(player).getColor();
 		String strongest = "";
 		int max = 0;
 		int neightbours = 0;
