@@ -1,16 +1,13 @@
 package Strategy;
 
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.awt.image.WritableRaster;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
 
-import javax.swing.ImageIcon;
+
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 
 import Model.Continent;
 import Model.Country;
@@ -18,8 +15,6 @@ import Model.InitializePhase;
 import Model.Player;
 import View.BackEnd;
 import View.PlayView;
-import View.CardView.CardPane.checkCard;
-import View.InitGame.initPane;
 
 public class RandomSt implements BehaviorStrategy {
 
@@ -116,19 +111,28 @@ public class RandomSt implements BehaviorStrategy {
 		}
 
 //		updating information and transfer armies
-		String[] record = tmp.split(" ");
+		if(tmp == "") {
+			System.out.println("Get into Random fortification: ");
+			fortification(null, null, null, observable, b);
+		} else {
+			String[] record = tmp.split(" ");
 		if (!record[1].equals("0")) {
 			int armies = randomArimes(Integer.parseInt(record[1]), Integer.parseInt(record[2]));
 			observable.Fortification(att, def, armies);
 
-			System.out.println("Random transfer armies from " + att + " to " + def + " armies: " + armies);
+			System.out.println( playView.name.getText() + " transfer armies from " + att + " to " + def + " armies: " + armies);
 
-			System.out.println("Get into Random fortification: ");
+			
+			System.out.println( playView.name.getText() +" get into Random fortification:");
 			fortification(null, null, null, observable, b);
+			} else {
+				System.out.println( playView.name.getText() +" get into Random fortification:");
+				fortification(null, null, null, observable, b);
+			}
 		}
+		
 
-		System.out.println("Get into Random fortification: ");
-		fortification(null, null, null, observable, b);
+		
 
 	}
 
@@ -140,6 +144,8 @@ public class RandomSt implements BehaviorStrategy {
 		playerSet = observable.getPlayerSet();
 		Player curPlayer = playerSet.get(playView.name.getText().split("_")[1]);
 
+		String[] fullname = playView.name.getText().split("_");
+		String player = fullname[1];
 //		a country can transfer which must hold more than 1 armies
 		LinkedList<Country> cantransferCountries = new LinkedList<Country>();
 		for (Country country : curPlayer.getCountryList()) {
@@ -150,47 +156,115 @@ public class RandomSt implements BehaviorStrategy {
 
 //		get a random country which can transfer armies
 		Random random = new Random();
-		int index = random.nextInt(cantransferCountries.size());
-		Country fromCountry = cantransferCountries.get(index);
-		cantransferCountries.clear();
+		int index = (int)(0+Math.random()*cantransferCountries.size());
+	//	int index = random.nextInt(cantransferCountries.size());
+	//	(int)(0+Math.random()*list.size());
+		if(cantransferCountries.size() != 0) {
+			Country fromCountry = cantransferCountries.get(index);
+			cantransferCountries.clear();
 
-		for (Country country : curPlayer.getCountryList()) {
-			if ((country.getName() != fromCountry.getName())// cannot self-transfer..
-					&& observable.canTransfer(playView.name.getText().split("_")[1],
-							toString().valueOf(fromCountry.getName()), toString().valueOf(country.getName()))) {
-				cantransferCountries.add(country);
+			for (Country country : curPlayer.getCountryList()) {
+				if ((country.getName() != fromCountry.getName())// cannot self-transfer..
+						&& observable.canTransfer(playView.name.getText().split("_")[1],
+								toString().valueOf(fromCountry.getName()), toString().valueOf(country.getName()))) {
+					cantransferCountries.add(country);
+				}
 			}
-		}
 
-		if (cantransferCountries.size() == 0) {
-			
-			System.out.println("Random country with no path to transfer");
-			
-		} else {
-			
-//			trandfer random armies to target country
-			index = random.nextInt(cantransferCountries.size());
-			Country toCountry = cantransferCountries.get(index);
-			
-			int armires = 0;
-			if (fromCountry.getArmy() == 2) {
-				armires = 1;
-			}else {
-				armires = randomArimes(1, fromCountry.getArmy() - 1);
+			if (cantransferCountries.size() == 0) {
+				
+				System.out.println( playView.name.getText()+ " Random country with no path to transfer");
+				
+			} else {
+				
+//				trandfer random armies to target country
+				index = random.nextInt(cantransferCountries.size());
+				Country toCountry = cantransferCountries.get(index);
+				
+				int armires = 0;
+				if (fromCountry.getArmy() == 2) {
+					armires = 1;
+				}else {
+					armires = randomArimes(1, fromCountry.getArmy() - 1);
+				}
+				
+				observable.Fortification(toString().valueOf(fromCountry.getName()), toString().valueOf(toCountry.getName()),
+						armires);
+
+				System.out.println( playView.name.getText()+ " fortification from : " + fromCountry.getName() + " to : " + toCountry.getName()
+						+ " armies : " + armires);
+
 			}
-			
-			observable.Fortification(toString().valueOf(fromCountry.getName()), toString().valueOf(toCountry.getName()),
-					armires);
 
-			System.out.println("Random fortification from : " + fromCountry.getName() + " to : " + toCountry.getName()
-					+ " armies : " + armires);
+		} 
+		
+		// fortification only one time enter reinforcement
+		playView.currentPhase = "Reinforcement";
+		playView.phase.setText("Reinforcement");
+		playerSet = observable.getPlayerSet();
+		String nextP = findnext(player);
+		if (!nextP.equals(player)) {
+			
+		
+		// change player
+		String playername = playerSet.get(nextP).getPlayerName()+"_"+nextP;
+		playView.name.setText(playername);
+		playView.color.setBackground(playerSet.get(nextP).getColor());
+		
+		//next player is Human and card army != 0
+		if (playerSet.get(nextP).getCardList().size() != 0 && playerSet.get(nextP).getPlayerName().equals("Human")) {
+			observable.Reinforcement(nextP);
+			observable.cardArmy(nextP, playerSet.get(nextP).getCardList(), false);
+			playView.armies.setText(
+					"<html><body><p align=\"center\">calculating...<br/>press&nbsp;reinforcement</p></body></html>");
 
 		}
-
-		observable.nextTurn(1);
+		//next player is Human and card army ==0
+		else if(playerSet.get(nextP).getCardList().size() == 0 &&playerSet.get(nextP).getPlayerName().equals("Human")){
+			observable.Reinforcement(nextP);
+			playView.armies.setText(String.valueOf(playerSet.get(nextP).getArmy()));
+		}
+		// next player is not human
+		else if (!playerSet.get(nextP).getPlayerName().equals("Human")) {
+			observable.nextTurn(1);
+		}
+		}
 
 	}
+	/**
+	 * This method finds who is next player.
+	 * 
+	 * @param current Current player.
+	 * @return Next player.
+	 */
+	public String findnext(String current) {
 
+		int max = maxplayer();
+		String next = String.valueOf(Integer.valueOf(current) + 1);
+		if (Integer.valueOf(current) == max) {
+			next = "1";
+		}
+		if (playerSet.containsKey(next)) {
+			return next;
+		} else {
+			return findnext(next);
+		}
+	}
+	/**
+	 * This method finds the max number of player.
+	 * 
+	 * @return Player name.
+	 */
+	public int maxplayer() {
+		int max = 0;
+		for (String key : playerSet.keySet()) {
+			int temp = Integer.valueOf(key);
+			if (temp > max) {
+				max = temp;
+			}
+		}
+		return max;
+	}
 	/**
 	 * 
 	 * @param player
@@ -321,11 +395,10 @@ public class RandomSt implements BehaviorStrategy {
 	 */
 	public int randomArimes(int from, int to) {
 
-		int max = from;
-		int min = to;
+		int min = from;
+		int max = to;
 		Random random = new Random();
-		int s = random.nextInt(max) % (max - min + 1) + min;
-
+		int s = random.nextInt(max-min+1)+min;
 		System.out.println("Random transfer armies: " + s);
 
 		return s;
