@@ -11,8 +11,13 @@ import Strategy.Benevolent;
 import Strategy.Cheater;
 import Strategy.Human;
 import Strategy.RandomSt;
+import Strategy.TourAggressive;
+import Strategy.TourBenevolent;
+import Strategy.TourCheater;
+import Strategy.TourRandom;
 import View.CardView;
 import View.PlayView;
+import View.TourMode;
 
 /**
  * <h1>InitializePhase</h1> 
@@ -136,7 +141,14 @@ public class InitializePhase extends Observable {
 	public void receivemap( ArrayList<String> mapList ) {
 		printmaps = (ArrayList<String>) mapList.clone();
 	}
+
 	public void receive(ArrayList<String> mapList, ArrayList<String> playerList, String times, int turns) {
+		HashMap<String, Player> pl = new HashMap<>();
+		HashMap<String, Country> cou = new HashMap<>();
+		HashMap<String, Continent> con = new HashMap<>();
+		setCountries(cou);
+		setContinents(con);
+		setPlayerSet(pl);
 		TournamentMode = true;
 		G = Integer.valueOf(times);
 		D = turns;
@@ -144,18 +156,14 @@ public class InitializePhase extends Observable {
 		System.out.println(maps.size());
 		addturn();
 		IO io = new IO();
-		String filename = "mapfile/" + mapList.get(0);
+		String filename = "mapfile/" + maps.get(0);
 		io.readFile(filename);
-		
 		addData(playerList.size(), playerList,  io.getCountries(), io.getContinents());
-		initPhase();
-		PlayView playView = new PlayView();
-		playView.countries = getCountries();
-		playView.continents = getContinents();
-		playView.playerSet =getPlayerSet();
-		String fullname = playerSet.get("1").getPlayerName()+"_"+"1";
-		playView.name.setText(fullname);
-		this.addObserver(playView);
+		initPhase(true);
+
+		TourMode tourmode = new TourMode(getCountries(),getContinents(),getPlayerSet());
+		this.addObserver(tourmode);
+		
 		
 	}
 	public void addturn() {
@@ -183,7 +191,7 @@ public class InitializePhase extends Observable {
 		maps.remove(0);
 		if (maps.size()!=0) {
 			setDturns(0);
-			playtime ++;
+			playtime =0;
 			receive(maps, playerType, String.valueOf(G), D);
 		}
 		else {
@@ -194,7 +202,7 @@ public class InitializePhase extends Observable {
 				System.out.print(printmaps.get(i)+" ");
 			}
 			System.out.println();
-			System.out.print("P ");
+			System.out.print("P: ");
 			for(int i=0; i<playerType.size();i++) {
 				System.out.print(playerType.get(i)+" ");
 			}
@@ -210,13 +218,20 @@ public class InitializePhase extends Observable {
 				}
 				System.out.println();
 			}
-			System.exit(0);
+		//	System.exit(0);
 		}
 		
 	}
-	public void initPhase() {
+	public void initPhase(boolean Mode) {
 		boolean judgeNum = judgePlayerNum();
-		boolean initPlatyer = initializePlayerSet();
+		boolean initPlatyer;
+		if (Mode) {
+			initPlatyer = initialTourPlayerSet();
+		}
+		else {
+			initPlatyer = initializePlayerSet();
+		}
+		
 		boolean initAmry = initializeArmy();
 		boolean initCount = initializeCountries();
 		
@@ -252,6 +267,45 @@ public class InitializePhase extends Observable {
 
 	}
 
+	private boolean initialTourPlayerSet() {
+
+		LinkedList<Color> colorLinkedList = cList.getColors();
+		for (int i = 1; i <= playerNum; i++) {
+			String playName = this.playerType.get(i-1);
+			Player player = new Player(playName);
+			//set player strategy
+			switch (playName) {
+			case "Aggressive":
+				player.setStrategy(new TourAggressive());
+				break;
+			case "Benevolent":
+				player.setStrategy(new TourBenevolent());
+				break;
+			case "Random":
+				player.setStrategy(new TourRandom());
+				break;
+			case "Cheater":
+				player.setStrategy(new TourCheater());
+				break;
+			default:
+				System.out.println("Get into default!!");
+				break;
+			}
+			
+			player.setColor(colorLinkedList.get(i - 1));// set player color
+			playerSet.put(String.valueOf(i), player);// add player to playerSet; key is "1,2,3..." 
+		}
+
+
+		if (playerSet.size() == playerNum) {
+			System.out.println("InitializePlayerSet success");
+			return true;
+		} else {
+			System.out.println("InitializePlayerSet Failure");
+			return false;
+		}
+	
+	}
 	/**
 	 * This method implements player objects and stores them into player set.
 	 *
@@ -421,7 +475,7 @@ public class InitializePhase extends Observable {
 		int system = SystemArmy(player);
 		int continent = ContinentArmy(player);
 		int card = 0;
-		if (!playerSet.get(player).equals("Human")) {
+		if (!playerSet.get(player).getPlayerName().equals("Human")) {
 			
 			String result = autoChangeCard(playerSet.get(player));
 			String[] tmp = result.split(" ");
@@ -814,12 +868,7 @@ public class InitializePhase extends Observable {
 	}
 	public InitializePhase cheaterAttack(HashMap<String, String> occupycou) {
 		for (String key: occupycou.keySet()) {
-//			try {
-//				Thread.sleep(500);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+
 			String[] information = occupycou.get(key).split("_");
 			String attaker = information[0];
 			String defender = information[1];
@@ -880,6 +929,7 @@ public class InitializePhase extends Observable {
 		
 		setChanged();
 		notifyObservers(this);
+
 	}
 
 }

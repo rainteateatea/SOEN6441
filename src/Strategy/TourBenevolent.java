@@ -1,8 +1,10 @@
 package Strategy;
 
+import java.time.Year;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
+
 import javax.swing.JLabel;
 
 import Model.Continent;
@@ -10,25 +12,23 @@ import Model.Country;
 import Model.InitializePhase;
 import Model.Player;
 import View.BackEnd;
-import View.PlayView;
 
-public class Benevolent implements BehaviorStrategy {
+public class TourBenevolent implements BehaviorStrategy{
 
 	public HashMap<String, Country> countries = new HashMap<>();
 	public HashMap<String, Continent> continents = new HashMap<>();
 	public HashMap<String, Player> playerSet = new HashMap<>();
-	PlayView playView;
-
 	@Override
 	public void reinforcemnet(JLabel c, String click, InitializePhase observable, BackEnd b) {
-		observable.nextTurn(0);
-		System.out.println("enter Benevolent Reinforcement phase");
 		countries = observable.getCountries();
 		continents = observable.getContinents();
 		playerSet = observable.getPlayerSet();
-		String[] fullname = playView.name.getText().split("_");
-		String player = fullname[1];
-		Player curPlayer = playerSet.get(playView.name.getText().split("_")[1]);
+		String player = click;
+		String fullname =  playerSet.get(player).getPlayerName()+"_"+player;
+		System.out.println(fullname+" enter Reinforcement phase");
+		
+	
+		Player curPlayer = playerSet.get(player);
 
 //		find weakest countries
 
@@ -56,11 +56,15 @@ public class Benevolent implements BehaviorStrategy {
 		if (curPlayer.getArmy() == 0) 
 		{
 			
-			
-				// cannot attack enter fortification phase
-				System.out.println("enter Benevolent fortification phase");
-				fortification(null, null, null, observable, b);
-			
+				if (observable.getDturns() == observable.D) {
+					System.out.println("it is a draw");
+					observable.refreshgame("draw");
+				}
+				else {
+					// cannot attack enter fortification phase
+					System.out.println("enter Benevolent fortification phase");
+					fortification(null, null, player, observable, b);
+				}
 
 			
 		}
@@ -69,9 +73,7 @@ public class Benevolent implements BehaviorStrategy {
 
 	@Override
 	public void attack(JLabel from, JLabel to, InitializePhase observable, BackEnd b) {
-		System.out.println("enter Benevolent fortification phase");
 		
-		//fortification(null, null, null, observable, b);
 	}
 
 	@Override
@@ -79,9 +81,10 @@ public class Benevolent implements BehaviorStrategy {
 		countries = observable.getCountries();
 		continents = observable.getContinents();
 		playerSet = observable.getPlayerSet();
-		String[] fullname = playView.name.getText().split("_");
-		String player = fullname[1];
-		Player curPlayer = playerSet.get(fullname[1]);
+		String player = to;
+		String fullname =  playerSet.get(player).getPlayerName()+"_"+player;
+		
+		Player curPlayer = playerSet.get(player);
 		
 		Country fromCountry = innerCountry(curPlayer);
 	
@@ -92,13 +95,13 @@ public class Benevolent implements BehaviorStrategy {
 
 		for (Country country : list) {
 		//	System.out.println(fromCountry.getContinent()+fromCountry.getArmy()+" "+country.getContinent()+country.getArmy());
-			if (observable.canTransfer(fullname[1], String.valueOf(fromCountry.getName()),
+			if (observable.canTransfer(player, String.valueOf(fromCountry.getName()),
 					String.valueOf(country.getName()))) {
 				int move = fromCountry.getArmy() - 1;
 			
 				observable.Fortification(String.valueOf(fromCountry.getName()),
 						String.valueOf(country.getName()),move);
-				System.out.println( playView.name.getText()+"Fortification : from " + fromCountry.getName() + " to " + country.getName() + " move " + move);
+				System.out.println(fullname+"Fortification : from " + fromCountry.getName() + " to " + country.getName() + " move " + move);
 				break;
 			}
 
@@ -106,37 +109,22 @@ public class Benevolent implements BehaviorStrategy {
 		
 		
 		// fortification only one time enter reinforcement
-		playView.currentPhase = "Reinforcement";
-		playView.phase.setText("Reinforcement");
+	
 		playerSet = observable.getPlayerSet();
 		String nextP = findnext(player,observable);
 		// change player
 		String playername = playerSet.get(nextP).getPlayerName()+"_"+nextP;
-		playView.name.setText(playername);
-		playView.color.setBackground(playerSet.get(nextP).getColor());
+		// next player is not human
+		playerSet.get(nextP).reinforcement(null, nextP, observable, b);
 		
-		//next player 为 Human 并且 card army 不为0
-		if (playerSet.get(nextP).getCardList().size() != 0 && playerSet.get(nextP).getPlayerName().equals("Human")) {
-			observable.Reinforcement(nextP);
-			observable.cardArmy(nextP, playerSet.get(nextP).getCardList(), false);
-			playView.armies.setText(
-					"<html><body><p align=\"center\">calculating...<br/>press&nbsp;reinforcement</p></body></html>");
-
-		}
-		//next player 为 Human 并且 card army 为0
-		else if(playerSet.get(nextP).getCardList().size() == 0 &&playerSet.get(nextP).getPlayerName().equals("Human")){
-			observable.Reinforcement(nextP);
-			playView.armies.setText(String.valueOf(playerSet.get(nextP).getArmy()));
-		}
-		// next player 不是 human
-		else if (!playerSet.get(nextP).getPlayerName().equals("Human")) {
-			observable.nextTurn(1);
-		}
+		
+		
 		
 		
 
 	
 	}
+	
 	/**
 	 * This method finds who is next player.
 	 * 
@@ -149,8 +137,9 @@ public class Benevolent implements BehaviorStrategy {
 		String next = String.valueOf(Integer.valueOf(current) + 1);
 		if (Integer.valueOf(current) == max) {
 			next = "1";
-		
+			if (observable.TournamentMode) {
 				observable.addturn();
+			}
 			
 		}
 		if (playerSet.containsKey(next)) {
@@ -212,7 +201,5 @@ public class Benevolent implements BehaviorStrategy {
 			Collections.sort(list);
 			return list.peekLast();
 		}
-
 	}
-
 }

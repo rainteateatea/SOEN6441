@@ -50,14 +50,19 @@ public class Test {
 	
 	
 	public static void main(String args[]) {
-		int[] a = {2,7,3,1,5,6};
-		int temp = a[0];
-		for (int i = 1; i < a.length; i++) {
-			if (temp >a[i]) {
-				temp = a[i];
-			}
-		}
-		System.out.println(temp);
+//		int[] a = {2,7,3,1,5,6};
+//		int temp = a[0];
+//		for (int i = 1; i < a.length; i++) {
+//			if (temp >a[i]) {
+//				temp = a[i];
+//			}
+//		}
+//		System.out.println(temp);
+		ArrayList<Integer> arrayList  = new ArrayList<>();
+		arrayList.add(1);
+		arrayList.add(2);
+		arrayList.remove(0);
+		System.out.println(arrayList.get(0));
 //		final Timer timer = new Timer();
 //	    TimerTask task = new TimerTask() {
 //	        private int count;

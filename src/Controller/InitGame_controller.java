@@ -55,7 +55,7 @@ public class InitGame_controller extends Object {
 		if (result) {
 			pharseModel.addData(num, playList,countries, continents);
 			
-			pharseModel.initPhase();
+			pharseModel.initPhase(false);
 			countries = pharseModel.getCountries();
 			continents = pharseModel.getContinents();
 			PlayView p = new PlayView();

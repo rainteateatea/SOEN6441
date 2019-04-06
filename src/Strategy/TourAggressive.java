@@ -1,7 +1,6 @@
 package Strategy;
 
 import java.awt.Color;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -14,43 +13,31 @@ import Model.Country;
 import Model.InitializePhase;
 import Model.Player;
 import View.BackEnd;
-import View.PlayView;
 
-public class Aggressive implements BehaviorStrategy {
 
+public class TourAggressive implements BehaviorStrategy{
 	public HashMap<String, Country> countries = new HashMap<>();
 	public HashMap<String, Continent> continents = new HashMap<>();
 	public HashMap<String, Player> playerSet = new HashMap<>();
-	PlayView playView;
-
 	@Override
 	public void reinforcemnet(JLabel c, String click, InitializePhase observable, BackEnd b) {
-		observable.nextTurn(0);
-		System.out.println( playView.name.getText() + "@enter reinforcement phase");
 		countries = observable.getCountries();
 		continents = observable.getContinents();
 		playerSet = observable.getPlayerSet();
-		
-		Player curPlayer = playerSet.get(playView.name.getText().split("_")[1]);
-		String[] fullname = playView.name.getText().split("_");
-		String player = fullname[1];
+		String player = click;
+		String fullname = playerSet.get(player).getPlayerName()+"_"+player;
+		System.out.println(fullname+" enter Reinforcement phase");
 		observable.Reinforcement(player);
-		PlayView.armies.setText(String.valueOf(playerSet.get(player).getArmy()));
 		String strong = Strongest(player);
-
-		
-
-		while (curPlayer.getArmy() != 0) {
+		while (playerSet.get(player).getArmy() != 0) {
 			observable.Startup(player, strong);
 		}
-		if (curPlayer.getArmy() == 0) {
+		if ((playerSet.get(player).getArmy() == 0)) {
 			boolean canAttack = b.canAttack(player);
 			if (canAttack) {
 
 				// enter attack phase
-				System.out.println( playView.name.getText() +" enter Aggressive Attack phase");
-				PlayView.phase.setText("Attack");
-				PlayView.currentPhase = "Attack";
+				System.out.println( fullname+" enter Aggressive Attack phase");
 				JLabel p = new JLabel();
 				p.setText(player);
 				p.setName(strong);
@@ -59,7 +46,7 @@ public class Aggressive implements BehaviorStrategy {
 			} else if(playerSet.size()!=1){
 
 				// cannot attack enter fortification phases
-				System.out.println( playView.name.getText()+"enter Aggressive fortification phase");
+				System.out.println( fullname+"enter Aggressive fortification phase");
 				fortification(null, null, null, observable, b);
 			}
 		}
@@ -72,6 +59,7 @@ public class Aggressive implements BehaviorStrategy {
 		playerSet = observable.getPlayerSet();
 		boolean win = false;
 		String player = playcountry.getText();
+		String fullname = playerSet.get(player).getPlayerName()+"_"+player;
 		String atcountry = playcountry.getName();
 		String[] defcountry = countries.get(atcountry).getCountryList().split(" ");
 		for (int i = 0; i < defcountry.length; i++) {
@@ -107,12 +95,20 @@ public class Aggressive implements BehaviorStrategy {
 //		use strongest country to attack until it cannot attack anymore
 		playerSet = observable.getPlayerSet();
 		if (playerSet.size() != 1) {
-			System.out.println( playView.name.getText()+" enter Aggressive fortification phase");
-			fortification(null, null, null, observable, b);
+			if (observable.getDturns() == observable.D) {
+				System.out.println("it is a draw");
+				observable.refreshgame("draw");
+			}
+			else {
+				
+				System.out.println( fullname+" enter Aggressive fortification phase");
+				fortification(null, null, player, observable, b);
+			}
+		
 		}
 		else {
-			JOptionPane.showMessageDialog(null,
-					"Congradulation!!!!player " +  playView.name.getText() + " is winnner!!!");
+			System.out.println("Congradulation!!!!player " +  fullname + " is winnner!!!");
+			observable.refreshgame(playerSet.get(player).getPlayerName());
 		}
 		
 		
@@ -124,10 +120,10 @@ public class Aggressive implements BehaviorStrategy {
 		countries = observable.getCountries();
 		continents = observable.getContinents();
 		playerSet = observable.getPlayerSet();
-		Player curPlayer = playerSet.get(playView.name.getText().split("_")[1]);
-		String[] fullname = playView.name.getText().split("_");
-		String player = fullname[1];
-		LinkedList<Country> list = new LinkedList<Country>(curPlayer.getCountryList());
+	//	Player curPlayer = playerSet.get(playView.name.getText().split("_")[1]);
+	//	String[] fullname = playView.name.getText().split("_");
+		String player = to;
+		LinkedList<Country> list = new LinkedList<Country>(playerSet.get(player).getCountryList());
 		Collections.sort(list);
 
 		if (list.peekLast().getArmy() == 1) {
@@ -150,45 +146,27 @@ public class Aggressive implements BehaviorStrategy {
 		}
 		
 		// fortification only one time enter reinforcement
-		playView.currentPhase = "Reinforcement";
-		playView.phase.setText("Reinforcement");
+		
 		playerSet = observable.getPlayerSet();
 		String nextP = findnext(player,observable);
 		// change player
 		String playername = playerSet.get(nextP).getPlayerName()+"_"+nextP;
-		playView.name.setText(playername);
-		playView.color.setBackground(playerSet.get(nextP).getColor());
 		
-		//next player is Human and card army != 0
-		if (playerSet.get(nextP).getCardList().size() != 0 && playerSet.get(nextP).getPlayerName().equals("Human")) {
-			observable.Reinforcement(nextP);
-			observable.cardArmy(nextP, playerSet.get(nextP).getCardList(), false);
-			playView.armies.setText(
-					"<html><body><p align=\"center\">calculating...<br/>press&nbsp;reinforcement</p></body></html>");
-
-		}
-		//next player is Human and card army ==0
-		else if(playerSet.get(nextP).getCardList().size() == 0 &&playerSet.get(nextP).getPlayerName().equals("Human")){
-			observable.Reinforcement(nextP);
-			playView.armies.setText(String.valueOf(playerSet.get(nextP).getArmy()));
-		}
+		
+		
 		// next player is not human
-		else if (!playerSet.get(nextP).getPlayerName().equals("Human")) {
-			observable.nextTurn(1);
-		}
+	
+		playerSet.get(nextP).reinforcement(null, nextP, observable, b);
 	}
-	/**
-	 * This method finds who is next player.
-	 * 
-	 * @param current Current player.
-	 * @return Next player.
-	 */
+	
 	public String findnext(String current,InitializePhase observable) {
 
 		int max = maxplayer();
 		String next = String.valueOf(Integer.valueOf(current) + 1);
 		if (Integer.valueOf(current) == max) {
 			next = "1";
+			
+				observable.addturn();
 		
 		}
 		if (playerSet.containsKey(next)) {
@@ -246,7 +224,8 @@ public class Aggressive implements BehaviorStrategy {
 		}
 		return armies;
 	}
-	public String canTransfer(Country country, LinkedList<Country> linkedList, InitializePhase observable,
+	
+	private String canTransfer(Country country, LinkedList<Country> linkedList, InitializePhase observable,
 			String player) {
 		String name = String.valueOf(country.getName());
 		LinkedList<Country> list = new LinkedList<Country>();

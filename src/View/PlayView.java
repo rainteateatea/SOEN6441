@@ -68,8 +68,7 @@ public class PlayView extends JFrame implements Observer {
 	InitializePhase observable = new InitializePhase();
 
 	DominationView dominationView;
-	Player human = new Player();
-
+	
 	private static final long serialVersionUID = 1L;
 	JFrame frame = new JFrame("Risk Game");
 
@@ -114,7 +113,7 @@ public class PlayView extends JFrame implements Observer {
 		observable.addObserver(b);
 		observable.addObserver(this);
 	
-		human.setStrategy(new Human());
+		
 		
 		EventQueue.invokeLater(new Runnable() {
 
@@ -129,10 +128,10 @@ public class PlayView extends JFrame implements Observer {
 						| UnsupportedLookAndFeelException ex) {
 					ex.printStackTrace();
 				}
-
+				System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@");
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				PlayPane playPane = new PlayPane();
-				frame.add(playPane, BorderLayout.WEST);
+		//		PlayPane playPane = new PlayPane();
+				frame.add( new PlayPane(), BorderLayout.WEST);
 				observable.addObserver(dominationView);
 				frame.add(dominationView, BorderLayout.EAST);
 				observable.addObserver(dominationView);
@@ -311,6 +310,7 @@ public class PlayView extends JFrame implements Observer {
 			
 			//判断是否为Human
 			if (!playerSet.get(lastname).getPlayerName().equals("Human")) {
+				System.out.println("############");
 				startupPlayer("1");
 			}
 
@@ -353,22 +353,32 @@ public class PlayView extends JFrame implements Observer {
 				// get into reinforcement phase
 				if (playerSet.get("1").getPlayerName().equals("Human")) {
 					//next player 为 human
+					System.out.println("@@enter reinforcement phase");
+					phase.setText("Reinforcement");
+					currentPhase = "Reinforcement";
+					observable.Reinforcement("1");
+					String lastname = playerSet.get("1").getPlayerName()+"_"+"1";
+					name.setText(lastname);
+					armies.setText(String.valueOf(playerSet.get("1").getArmy()));
+					color.setBackground(playerSet.get("1").getColor());
 					JOptionPane.showMessageDialog(null, "enter reinforcement phase");
 				}
 				else {
 					//next player 非 human
 				//	reinforcement("1");
+					
+					System.out.println("@@enter reinforcement phase");
+					phase.setText("Reinforcement");
+					currentPhase = "Reinforcement";
+					observable.Reinforcement("1");
+					String lastname = playerSet.get("1").getPlayerName()+"_"+"1";
+					name.setText(lastname);
+					armies.setText(String.valueOf(playerSet.get("1").getArmy()));
+					color.setBackground(playerSet.get("1").getColor());
 					playerSet.get("1").reinforcement(name,"", observable, b);
 				}
 				
-				System.out.println("enter reinforcement phase");
-				phase.setText("Reinforcement");
-				currentPhase = "Reinforcement";
-				observable.Reinforcement("1");
-				String lastname = playerSet.get("1").getPlayerName()+"_"+"1";
-				name.setText(lastname);
-				armies.setText(String.valueOf(playerSet.get("1").getArmy()));
-				color.setBackground(playerSet.get("1").getColor());
+				
 			}
 			else if (!playerSet.get(nextP).getPlayerName().equals("Human")) {
 				String fullname = playerSet.get(nextP).getPlayerName()+"_"+nextP;

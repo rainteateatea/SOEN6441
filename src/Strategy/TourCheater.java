@@ -14,22 +14,18 @@ import Model.Country;
 import Model.InitializePhase;
 import Model.Player;
 import View.BackEnd;
-import View.PlayView;
 
-public class Cheater implements BehaviorStrategy{
+public class TourCheater implements BehaviorStrategy{
 	public HashMap<String, Country> countries = new HashMap<>();
 	public HashMap<String, Continent> continents = new HashMap<>();
 	public HashMap<String, Player> playerSet = new HashMap<>();
-	PlayView playView;
 	@Override
-	public void reinforcemnet(JLabel c, String click,
-			InitializePhase observable, BackEnd b) {
-	
-		observable.nextTurn(0);
-		String[] fullname = playView.name.getText().split("_");
-		System.out.println(playView.name.getText()+"&enter reinforcement phase");
-		String player = fullname[1];
+	public void reinforcemnet(JLabel c, String click, InitializePhase observable, BackEnd b) {
 		playerSet = observable.getPlayerSet();
+		String player = click;
+		String fullname =  playerSet.get(player).getPlayerName()+"_"+player;
+		System.out.println(fullname+" enter reinforcement phase");
+		
 		ArrayList<String> countList = new ArrayList<>();
 		for (int i = 0; i < playerSet.get(player).getCountryList().size(); i++) {
 			int country = playerSet.get(player).getCountryList().get(i).getName();
@@ -38,21 +34,16 @@ public class Cheater implements BehaviorStrategy{
 		observable = observable.cheaterRein(player, countList);
 		playerSet = observable.getPlayerSet();
 		countries = observable.getCountries();
-		boolean canAttack = canAttack(player);
+		boolean canAttack = b.canAttack(player);
 		if (canAttack) {
 			//attack phase
-			System.out.println((playView.name.getText()+"enter Attack phase"));
-			playView.currentPhase = "Attack";
-			playView.phase.setText("Attack");
+			System.out.println((fullname+" enter Attack phase"));
 			JLabel attacker = new JLabel(player);
-		//	observable.internalPhase(true, "Attack");
-			//b does not update
 			attack(attacker, attacker, observable, b);
 		}
 		else if(!canAttack && playerSet.size()!=1){
-			System.out.println(player+"enter fortification phase");
-			playView.phase.setText("Fortification");
-			playView.currentPhase = "Fortification";
+			System.out.println(fullname+"enter fortification phase");
+		
 			//fortification phase
 			fortification(c, c, player, observable, b);
 		}
@@ -60,38 +51,16 @@ public class Cheater implements BehaviorStrategy{
 		
 		
 	}
-	/**
-	 * This method judges whether the player can attack other countries or not.
-	 * 
-	 * @param player Current player.
-	 * @return true if the player can attack.
-	 */
-	public boolean canAttack(String player) {
-		boolean canAttack = false;
-		LinkedList<Country> countrylist = playerSet.get(player).getCountryList();
-		for (int i = 0; i < countrylist.size(); i++) {
-			String attcoun = String.valueOf(countrylist.get(i).getName());
-			String[] surround = countries.get(attcoun).getCountryList().split(" ");
-			for (int j = 0; j < surround.length; j++) {
-				Color attColor = playerSet.get(player).getColor();
-				Color defColor = countries.get(surround[j]).getColor();
-				if (attColor != defColor && countrylist.get(i).getArmy() > 1) {
-					canAttack = true;
-				}
-			}
-		}
 
-		return canAttack;
-	}
 	@Override
-	public void attack(JLabel from, JLabel to, InitializePhase observable,
-			BackEnd b) {
+	public void attack(JLabel from, JLabel to, InitializePhase observable, BackEnd b) {
 		//from 
 		playerSet = observable.getPlayerSet();
 		countries = observable.getCountries();
 		HashMap<String, String> occupylist = new HashMap<>();
 		//ArrayList<String> occupylist = new ArrayList<>();
 		String player = from.getText();
+		String fullname =  playerSet.get(player).getPlayerName()+"_"+player;
 		for (int i = 0; i < playerSet.get(player).getCountryList().size(); i++) {
 			String atcoun  = String.valueOf(playerSet.get(player).getCountryList().get(i).getName());
 			
@@ -107,15 +76,18 @@ public class Cheater implements BehaviorStrategy{
 		observable = observable.cheaterAttack(occupylist);
 		playerSet = observable.getPlayerSet();
 		if (playerSet.size()!=1) {
-			System.out.println(playView.name.getText()+"enter fortification phase");
-			playView.phase.setText("Fortification");
-			playView.currentPhase = "Fortification";
-			fortification(null, null, player, observable, b);
+			if (observable.getDturns() == observable.D) {
+				System.out.println("it is a draw");
+				observable.refreshgame("draw");
+			}else {
+				System.out.println(fullname+"enter fortification phase");
+				fortification(null, null, player, observable, b);
+			}
+			
 		}
-	
 		else {
-			JOptionPane.showMessageDialog(null,
-					"Congradulation!!!!player " +  playView.name.getText() + " is winnner!!!");
+			System.out.println("Congradulation!!!!player " + fullname + " is winnner!!!");
+			observable.refreshgame(playerSet.get(player).getPlayerName());
 			
 			
 		}
@@ -124,8 +96,7 @@ public class Cheater implements BehaviorStrategy{
 	}
 
 	@Override
-	public void fortification(JLabel from, JLabel c, String player,
-			InitializePhase observable, BackEnd b) {
+	public void fortification(JLabel from, JLabel c, String player, InitializePhase observable, BackEnd b) {
 		playerSet = observable.getPlayerSet();
 		countries = observable.getCountries();
 		LinkedList<Country> atList = playerSet.get(player).getCountryList();
@@ -141,38 +112,21 @@ public class Cheater implements BehaviorStrategy{
 			}
 		}
 		// fortification only one time enter reinforcement
-					playView.currentPhase = "Reinforcement";
-					playView.phase.setText("Reinforcement");
+					
 					playerSet = observable.getPlayerSet();
 					String nextP = findnext(player,observable);
-					if (!nextP.equals(player)) {
+					
 						
 					
 					// change player
 					String playername = playerSet.get(nextP).getPlayerName()+"_"+nextP;
-					playView.name.setText(playername);
-					playView.color.setBackground(playerSet.get(nextP).getColor());
 					
-					//next player is Human and card army != 0
-					if (playerSet.get(nextP).getCardList().size() != 0 && playerSet.get(nextP).getPlayerName().equals("Human")) {
-						observable.Reinforcement(nextP);
-						observable.cardArmy(nextP, playerSet.get(nextP).getCardList(), false);
-						playView.armies.setText(
-								"<html><body><p align=\"center\">calculating...<br/>press&nbsp;reinforcement</p></body></html>");
-
-					}
-					//next player is Human and card army ==0
-					else if(playerSet.get(nextP).getCardList().size() == 0 &&playerSet.get(nextP).getPlayerName().equals("Human")){
-						observable.Reinforcement(nextP);
-						playView.armies.setText(String.valueOf(playerSet.get(nextP).getArmy()));
-					}
 					// next player is not human
-					else if (!playerSet.get(nextP).getPlayerName().equals("Human")) {
-						observable.nextTurn(1);
-					}
-					}
+					playerSet.get(nextP).reinforcement(null, nextP, observable, b);
+					
 		
 	}
+	
 	/**
 	 * This method finds who is next player.
 	 * 
@@ -186,6 +140,7 @@ public class Cheater implements BehaviorStrategy{
 		if (Integer.valueOf(current) == max) {
 			next = "1";
 			
+				observable.addturn();
 		
 			
 		}
