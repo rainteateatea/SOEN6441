@@ -12,6 +12,7 @@ import Strategy.Cheater;
 import Strategy.Human;
 import Strategy.RandomSt;
 import View.CardView;
+import View.PlayView;
 
 /**
  * <h1>InitializePhase</h1> 
@@ -26,10 +27,25 @@ public class InitializePhase extends Observable {
 	private  HashMap<String, Player> playerSet;
 	private  HashMap<String, Country> countries;
 	private HashMap<String, Continent> continents;
-	private ArrayList<String> playerType = new ArrayList<String>();
+	private static ArrayList<String> playerType = new ArrayList<String>();
 	private ColorList cList = new ColorList();
 	public boolean change = false;
-	
+	private int Dturns =0;;
+	public static int D;
+	public static int G;
+	public static ArrayList<String> maps = new ArrayList<>();
+	private static ArrayList<String> printmaps = new ArrayList<>();
+	private static int playtime = 1;
+	private static ArrayList<String> winnerlist = new ArrayList<>();
+	public static boolean TournamentMode = false;
+
+	public int getDturns() {
+		return Dturns;
+	}
+
+	public void setDturns(int dturns) {
+		Dturns = dturns;
+	}
 
 	/**
 	 * This is a constructor of initializePhase.
@@ -116,12 +132,88 @@ public class InitializePhase extends Observable {
 		this.playerNum = playerNum;
 		this.playerType = playlist;
 	}
-
-	/**
-	 * This method invokes judgePlayerNum(), initializePlayerSet(),
-	 * initializePlayerSet(), initializeCountries() to implement game's initializing
-	 * phase.
-	 */
+	
+	public void receivemap( ArrayList<String> mapList ) {
+		printmaps = (ArrayList<String>) mapList.clone();
+	}
+	public void receive(ArrayList<String> mapList, ArrayList<String> playerList, String times, int turns) {
+		TournamentMode = true;
+		G = Integer.valueOf(times);
+		D = turns;
+		maps = (ArrayList<String>) mapList.clone();
+		System.out.println(maps.size());
+		addturn();
+		IO io = new IO();
+		String filename = "mapfile/" + mapList.get(0);
+		io.readFile(filename);
+		
+		addData(playerList.size(), playerList,  io.getCountries(), io.getContinents());
+		initPhase();
+		PlayView playView = new PlayView();
+		playView.countries = getCountries();
+		playView.continents = getContinents();
+		playView.playerSet =getPlayerSet();
+		String fullname = playerSet.get("1").getPlayerName()+"_"+"1";
+		playView.name.setText(fullname);
+		this.addObserver(playView);
+		
+	}
+	public void addturn() {
+		int nowturn = getDturns();
+		System.out.println("Turn  "+nowturn);
+		
+		setDturns(nowturn+1);
+	}
+	public void refreshgame(String player) {
+		if (playtime <G) {
+			setDturns(0);
+			playtime++;
+			winnerlist.add(player);
+			receive(maps, playerType, String.valueOf(G), D);
+		}
+		else {
+			//change map
+			System.out.println("change map");
+			winnerlist.add(player);
+			refreshmap();
+		}
+		
+	}
+	public void refreshmap() {
+		maps.remove(0);
+		if (maps.size()!=0) {
+			setDturns(0);
+			playtime ++;
+			receive(maps, playerType, String.valueOf(G), D);
+		}
+		else {
+			//print result
+			System.out.println("print all result");
+			System.out.print("M: ");
+			for(int i=0 ; i< printmaps.size();i++) {
+				System.out.print(printmaps.get(i)+" ");
+			}
+			System.out.println();
+			System.out.print("P ");
+			for(int i=0; i<playerType.size();i++) {
+				System.out.print(playerType.get(i)+" ");
+			}
+			System.out.println();
+			System.out.println("G: "+G);
+			System.out.println("D: "+D);
+			int n= 0;
+			for(int i= 0;i<printmaps.size();i++) {
+				System.out.print(printmaps.get(i)+" ");
+				for (int j = 0; j < G; j++) {
+					System.out.print(winnerlist.get(n)+" ");
+					n++;
+				}
+				System.out.println();
+			}
+			System.exit(0);
+		}
+		
+	}
 	public void initPhase() {
 		boolean judgeNum = judgePlayerNum();
 		boolean initPlatyer = initializePlayerSet();

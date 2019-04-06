@@ -193,7 +193,7 @@ public class InitGame extends JFrame {
 									}
 								}
 								InitGame_controller controller = new InitGame_controller();
-								//n = 3;
+								
 								controller.receive(playlist.size(),playlist, filename);
 							}
 

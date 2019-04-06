@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 import Model.Continent;
 import Model.Country;
@@ -26,6 +27,7 @@ public class Cheater implements BehaviorStrategy{
 	
 		observable.nextTurn(0);
 		String[] fullname = playView.name.getText().split("_");
+		System.out.println(playView.name.getText()+"enter reinforcement phase");
 		String player = fullname[1];
 		playerSet = observable.getPlayerSet();
 		ArrayList<String> countList = new ArrayList<>();
@@ -39,7 +41,7 @@ public class Cheater implements BehaviorStrategy{
 		boolean canAttack = canAttack(player);
 		if (canAttack) {
 			//attack phase
-			System.out.println("enter Attack phase");
+			System.out.println((playView.name.getText()+"enter Attack phase"));
 			playView.currentPhase = "Attack";
 			playView.phase.setText("Attack");
 			JLabel attacker = new JLabel(player);
@@ -103,10 +105,32 @@ public class Cheater implements BehaviorStrategy{
 			}
 		}
 		observable = observable.cheaterAttack(occupylist);
-		System.out.println("enter fortification phase");
-		playView.phase.setText("Fortification");
-		playView.currentPhase = "Fortification";
-		fortification(null, null, player, observable, b);
+		playerSet = observable.getPlayerSet();
+		if (playerSet.size()!=1) {
+			System.out.println(playView.name.getText()+"enter fortification phase");
+			playView.phase.setText("Fortification");
+			playView.currentPhase = "Fortification";
+			fortification(null, null, player, observable, b);
+		}
+		else if (observable.TournamentMode) {
+			if (observable.getDturns() == observable.D) {
+				System.out.println("it is a draw");
+				observable.refreshgame("draw");
+			}
+			else if (playerSet.size() ==1) {
+				System.out.println("Congradulation!!!!player " +  playView.name.getText() + " is winnner!!!");
+				observable.refreshgame(playerSet.get(player).getPlayerName());
+				
+			}
+			
+		}
+		else {
+			JOptionPane.showMessageDialog(null,
+					"Congradulation!!!!player " +  playView.name.getText() + " is winnner!!!");
+			
+			
+		}
+	
 		
 	}
 
@@ -131,7 +155,10 @@ public class Cheater implements BehaviorStrategy{
 					playView.currentPhase = "Reinforcement";
 					playView.phase.setText("Reinforcement");
 					playerSet = observable.getPlayerSet();
-					String nextP = findnext(player);
+					String nextP = findnext(player,observable);
+					if (!nextP.equals(player)) {
+						
+					
 					// change player
 					String playername = playerSet.get(nextP).getPlayerName()+"_"+nextP;
 					playView.name.setText(playername);
@@ -154,6 +181,7 @@ public class Cheater implements BehaviorStrategy{
 					else if (!playerSet.get(nextP).getPlayerName().equals("Human")) {
 						observable.nextTurn(1);
 					}
+					}
 		
 	}
 	/**
@@ -162,17 +190,22 @@ public class Cheater implements BehaviorStrategy{
 	 * @param current Current player.
 	 * @return Next player.
 	 */
-	public String findnext(String current) {
+	public String findnext(String current,InitializePhase observable) {
 
 		int max = maxplayer();
 		String next = String.valueOf(Integer.valueOf(current) + 1);
 		if (Integer.valueOf(current) == max) {
 			next = "1";
+			if (observable.TournamentMode) {
+				observable.addturn();
+			}
+		
+			
 		}
 		if (playerSet.containsKey(next)) {
 			return next;
 		} else {
-			return findnext(next);
+			return findnext(next,observable);
 		}
 	}
 	

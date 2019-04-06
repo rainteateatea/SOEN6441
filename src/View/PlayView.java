@@ -57,7 +57,7 @@ public class PlayView extends JFrame implements Observer {
 	public HashMap<String, Country> countries = new HashMap<>();
 	public HashMap<String, Continent> continents = new HashMap<>();
 	public HashMap<String, Player> playerSet = new HashMap<>();
-	public static JLabel name;
+	public static JLabel name = new JLabel();
 	public static JLabel color;
 	public static JLabel armies;
 	public static String currentPhase;
@@ -100,12 +100,7 @@ public class PlayView extends JFrame implements Observer {
 			String[] fullname = name.getText().split("_");
 			playerSet.get(fullname[1]).reinforcement(null, "", observable, b);
 		}
-		if (playerSet.size() ==1) {
-			JOptionPane.showMessageDialog(null,
-					"Congradulation!!!!player " +  name.getText() + " is winnner!!!");
-			frame.dispose();
-			new StartGame();
-		}
+		
 		
 
 	}
@@ -289,15 +284,17 @@ public class PlayView extends JFrame implements Observer {
 			player.setBounds(1000, 20, 80, 25);
 			player.setName("player");
 			add(player);
-			name = new JLabel();
-			String fullname = playerSet.get("1").getPlayerName()+"_"+"1";
-			name.setText(fullname);
+		//	name = new JLabel();
+		//	String fullname = playerSet.get("1").getPlayerName()+"_"+"1";
+		//	name.setText(fullname);
+			String[] fullname = name.getText().split("_");
+			String lastname = fullname[1];
 			name.setName("player");
 			name.setBounds(1060, 20, 80, 25);
 			add(name);
 			color = new JLabel("");
 			color.setBounds(1130, 20, 25, 25);
-			color.setBackground(playerSet.get("1").getColor());
+			color.setBackground(playerSet.get(lastname).getColor());
 			color.setOpaque(true);
 			add(color);
 
@@ -306,14 +303,14 @@ public class PlayView extends JFrame implements Observer {
 			army.setText("Army: ");
 			army.setBounds(1000, 60, 80, 25);
 			add(army);
-			String n = String.valueOf(playerSet.get("1").getArmy());
+			String n = String.valueOf(playerSet.get(lastname).getArmy());
 			armies = new JLabel(n);
 			armies.setName("armies");
 			armies.setBounds(1100, 70, 80, 25);
 			add(armies);
 			
 			//判断是否为Human
-			if (!playerSet.get("1").getPlayerName().equals("Human")) {
+			if (!playerSet.get(lastname).getPlayerName().equals("Human")) {
 				startupPlayer("1");
 			}
 
@@ -346,6 +343,7 @@ public class PlayView extends JFrame implements Observer {
 		
 		
 		public void startupPlayer(String player) {
+			System.out.println(name.getText()+" start up");
 			//start up phase
 			String c = randomCountry(player);
 			observable.Startup(player, c);

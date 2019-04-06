@@ -25,6 +25,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import Controller.Tournament_controller;
+
 
 
 
@@ -55,17 +57,18 @@ public class Tournament {
 	
 		JLabel M = new JLabel("M: ");
 		panel.add(M);
-		ButtonGroup group = new ButtonGroup();
+		//ButtonGroup group = new ButtonGroup();
+		ArrayList<JRadioButton> maplist = new ArrayList<>();
 		JRadioButton map1 = new JRadioButton("world");
 		JRadioButton map2 = new JRadioButton("America");
 		JRadioButton map3 = new JRadioButton("Tamril");
 		JRadioButton map4 = new JRadioButton("Map4");
 		JRadioButton map5 = new JRadioButton("Map5");
-		group.add(map1);
-		group.add(map2);
-		group.add(map3);
-		group.add(map4);
-		group.add(map5);
+		maplist.add(map1);
+		maplist.add(map2);
+		maplist.add(map3);
+		maplist.add(map4);
+		maplist.add(map5);
 		panel.add(map1);
 		panel.add(map2);
 		panel.add(map3);
@@ -75,7 +78,7 @@ public class Tournament {
 		JLabel P = new JLabel("P: ");
 		panel.add(P);
 		ArrayList<JRadioButton> computers = new ArrayList<>();
-		JRadioButton com1 = new JRadioButton("Aggresive");
+		JRadioButton com1 = new JRadioButton("Aggressive");
 		JRadioButton com2 = new JRadioButton("Benevolent");
 		JRadioButton com3 = new JRadioButton("Random");
 		JRadioButton com4 = new JRadioButton("Cheater");
@@ -135,15 +138,18 @@ public class Tournament {
 		
 		panel.add(framesPerSecond);
 		int result =  JOptionPane.showConfirmDialog(null, panel, "Tournament Mode", JOptionPane.DEFAULT_OPTION);
-		String map;
+		String map = "";
 		ArrayList<String> playerList = new ArrayList<>();
+		ArrayList<String> listMap = new ArrayList<>();
+		
 		if (result == 0 ) {
 			//select map
-			for (Enumeration<AbstractButton> buttons = group.getElements(); buttons.hasMoreElements();) {
-				AbstractButton button = buttons.nextElement();
+			for (int i = 0; i<maplist.size();i++) {
+				JRadioButton button = maplist.get(i);
 
 				if (button.isSelected()) {
-					map = button.getText();
+					map = button.getText()+".map";
+					listMap.add(map);
 					System.out.println("you choose " + button.getText() + " map");
 				}
 			}
@@ -167,21 +173,13 @@ public class Tournament {
 			//how many turns
 			int turns = framesPerSecond.getValue();
 			System.out.println(turns+" turns");
+			Tournament_controller t_controller = new Tournament_controller();
+			t_controller.receive(listMap, playerList, map, turns);
 			
 		}
 		
 	}
-	//return correct map
-	private void fileList() {
-		
-		File file = new File("mapfile/");
-		File[] files = file.listFiles();
-		ArrayList<String> listfile = new ArrayList<>();
-		
-		for (int i = 0; i < files.length; i++) {
-			
-		}
-	}
+
 	
 
 }

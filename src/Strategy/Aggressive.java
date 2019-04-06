@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 import Model.Continent;
 import Model.Country;
@@ -54,7 +55,7 @@ public class Aggressive implements BehaviorStrategy {
 				p.setName(strong);
 				attack(p, null, observable, b);
 
-			} else {
+			} else if(playerSet.size()!=1){
 
 				// cannot attack enter fortification phases
 				System.out.println( playView.name.getText()+"enter Aggressive fortification phase");
@@ -75,15 +76,20 @@ public class Aggressive implements BehaviorStrategy {
 		for (int i = 0; i < defcountry.length; i++) {
 			String defender = b.findPlayer(defcountry[i]);
 			if (countries.get(atcountry).getArmy()== 1) {
+				System.out.println("aggressive cannot attack");
 				break;
 			}
+			//two different players
 			if (!player.equals(defender)) {
-				System.out.println("Aggressive_"+player+"uses country"+atcountry+" to attack country"+defender);
-				String canTransfer = observable.attackPhase(player, defender, "All_Out", 0, 0);
+				System.out.println("Aggressive_"+player+"uses country"+atcountry+" to attack country"+defcountry[i]);
+				String canTransfer = observable.attackPhase(atcountry, defcountry[i], "All_Out", 0, 0);
 				String record[] = canTransfer.split(" ");
 				if (record[0].equals(player)) {//winner is attacker
+					System.out.println("aggressive player win");
+
 					win = true;
 					if (!record[1].equals("0")) {
+						System.out.println("Aggressive_"+player+"move"+ record[1]);
 						observable.Fortification(atcountry, defcountry[i], Integer.valueOf(record[1]));
 					}
 					
@@ -98,10 +104,26 @@ public class Aggressive implements BehaviorStrategy {
 		
 
 //		use strongest country to attack until it cannot attack anymore
+		playerSet = observable.getPlayerSet();
+		if (playerSet.size() != 1) {
+			System.out.println( playView.name.getText()+" enter Aggressive fortification phase");
+			fortification(null, null, null, observable, b);
+		}else if (observable.TournamentMode) {
+			if (observable.getDturns() == observable.D) {
+				System.out.println("it is a draw");
+				observable.refreshgame("draw");
+			}
+			else if (playerSet.size() ==1) {
+				observable.refreshgame(playerSet.get(player).getPlayerName());
+				System.out.println("Congradulation!!!!player " +  playView.name.getText() + " is winnner!!!");
+			}
+			
+		}
+		else {
+			JOptionPane.showMessageDialog(null,
+					"Congradulation!!!!player " +  playView.name.getText() + " is winnner!!!");
+		}
 		
-		
-		System.out.println( playView.name.getText()+" enter Aggressive fortification phase");
-		fortification(null, null, null, observable, b);
 		
 	}
 
@@ -137,7 +159,7 @@ public class Aggressive implements BehaviorStrategy {
 		playView.currentPhase = "Reinforcement";
 		playView.phase.setText("Reinforcement");
 		playerSet = observable.getPlayerSet();
-		String nextP = b.findnext(player);
+		String nextP = findnext(player,observable);
 		// change player
 		String playername = playerSet.get(nextP).getPlayerName()+"_"+nextP;
 		playView.name.setText(playername);
@@ -161,7 +183,44 @@ public class Aggressive implements BehaviorStrategy {
 			observable.nextTurn(1);
 		}
 	}
+	/**
+	 * This method finds who is next player.
+	 * 
+	 * @param current Current player.
+	 * @return Next player.
+	 */
+	public String findnext(String current,InitializePhase observable) {
 
+		int max = maxplayer();
+		String next = String.valueOf(Integer.valueOf(current) + 1);
+		if (Integer.valueOf(current) == max) {
+			next = "1";
+			if (observable.TournamentMode) {
+				observable.addturn();
+			}
+		
+		}
+		if (playerSet.containsKey(next)) {
+			return next;
+		} else {
+			return findnext(next,observable);
+		}
+	}
+	/**
+	 * This method finds the max number of player.
+	 * 
+	 * @return Player name.
+	 */
+	public int maxplayer() {
+		int max = 0;
+		for (String key : playerSet.keySet()) {
+			int temp = Integer.valueOf(key);
+			if (temp > max) {
+				max = temp;
+			}
+		}
+		return max;
+	}
 	private String Strongest(String player) {
 		LinkedList<Country> candidates = playerSet.get(player).getCountryList();
 		String strongest = "";
