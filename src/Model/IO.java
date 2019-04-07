@@ -65,6 +65,14 @@ public class IO extends Observable {
 	}
 
 	/**
+	 * This method sets path.
+	 * 
+	 * @param path Path of file.
+	 */
+	public void setPath(String path) {
+		this.path = path;
+	}
+	/**
 	 * This method obtains a hash map which stores all countries in the map.
 	 *
 	 * @return A hash map which stores all countries in the map.

@@ -1,7 +1,14 @@
 package Model;
 
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
+import javax.imageio.IIOException;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import Strategy.Aggressive;
 import Strategy.Benevolent;
@@ -11,8 +18,7 @@ import Strategy.RandomSt;
 import View.CardView;
 
 /**
- * <h1>InitializePhase</h1> 
- * This is an initialized phase class.
+ * <h1>InitializePhase</h1> This is an initialized phase class.
  * 
  * @author jiamin_he chenwei_song
  * @version 3.0
@@ -20,12 +26,14 @@ import View.CardView;
  */
 public class InitializePhase extends Observable {
 	private int playerNum;
-	private  HashMap<String, Player> playerSet;
-	private  HashMap<String, Country> countries;
+	private HashMap<String, Player> playerSet;
+	private HashMap<String, Country> countries;
 	private HashMap<String, Continent> continents;
 	private ArrayList<String> playerType = new ArrayList<String>();
 	private ColorList cList = new ColorList();
-	private boolean change = false;
+	public boolean change = false;
+	private IO io;
+	public String gamePath = "mapfile/";
 
 	/**
 	 * This is a constructor of initializePhase.
@@ -33,6 +41,7 @@ public class InitializePhase extends Observable {
 	public InitializePhase() {
 		this.playerSet = new HashMap<>();
 		this.playerNum = 0;
+
 	}
 
 	/**
@@ -97,7 +106,6 @@ public class InitializePhase extends Observable {
 	public int getPlayerNum() {
 		return playerNum;
 	}
-	
 
 	/**
 	 * This method adding data to playerNum, countries, continents.
@@ -106,7 +114,8 @@ public class InitializePhase extends Observable {
 	 * @param countries  A hash map storing all countries which are in the map.
 	 * @param continents A hash map storing all continents which are in the map.
 	 */
-	public void addData(int playerNum, ArrayList<String> playlist,HashMap<String, Country> countries, HashMap<String, Continent> continents) {
+	public void addData(int playerNum, ArrayList<String> playlist, HashMap<String, Country> countries,
+			HashMap<String, Continent> continents) {
 		this.countries = countries;
 		this.continents = continents;
 		this.playerNum = playerNum;
@@ -123,9 +132,10 @@ public class InitializePhase extends Observable {
 		boolean initPlatyer = initializePlayerSet();
 		boolean initAmry = initializeArmy();
 		boolean initCount = initializeCountries();
-		
+
 		for (Map.Entry<String, Continent> cEntry : this.continents.entrySet()) {
-			System.out.println("Control Value of Continent " + cEntry.getKey()+ " : " + cEntry.getValue().getConvalue());
+			System.out
+					.println("Control Value of Continent " + cEntry.getKey() + " : " + cEntry.getValue().getConvalue());
 		}
 
 		if ((judgeNum && initPlatyer && initAmry && initCount) == true) {
@@ -149,7 +159,7 @@ public class InitializePhase extends Observable {
 			System.out.println("The number of player is greater than countries.");
 			return false;
 		} else {
-			
+
 			System.out.println("Get into initialized phase.");
 			return true;
 		}
@@ -164,9 +174,9 @@ public class InitializePhase extends Observable {
 	private boolean initializePlayerSet() {
 		LinkedList<Color> colorLinkedList = cList.getColors();
 		for (int i = 1; i <= playerNum; i++) {
-			String playName = this.playerType.get(i-1);
+			String playName = this.playerType.get(i - 1);
 			Player player = new Player(playName);
-			//set player strategy
+			// set player strategy
 			switch (playName) {
 			case "Human":
 				player.setStrategy(new Human());
@@ -187,11 +197,10 @@ public class InitializePhase extends Observable {
 				System.out.println("Get into default!!");
 				break;
 			}
-			
-			player.setColor(colorLinkedList.get(i - 1));// set player color
-			playerSet.put(toString().valueOf(i), player);// add player to playerSet; key is "1,2,3..." 
-		}
 
+			player.setColor(colorLinkedList.get(i - 1));// set player color
+			playerSet.put(String.valueOf(i), player);// add player to playerSet; key is "1,2,3..."
+		}
 
 		if (playerSet.size() == playerNum) {
 			System.out.println("InitializePlayerSet success");
@@ -214,7 +223,7 @@ public class InitializePhase extends Observable {
 			armyDefault = 40;
 			break;
 		case 3:
-			armyDefault = 15;
+			armyDefault = 35;
 			break;
 		case 4:
 			armyDefault = 30;
@@ -325,29 +334,27 @@ public class InitializePhase extends Observable {
 		int system = SystemArmy(player);
 		int continent = ContinentArmy(player);
 		int card = 0;
-		
-		if (!playerSet.get(player).equals("Human") && !playerSet.get(player).equals("Cheater")) {
-			
+		if (!playerSet.get(player).equals("Human")) {
+
 			String result = autoChangeCard(playerSet.get(player));
 			String[] tmp = result.split(" ");
 			card = card + Integer.parseInt(tmp[0]);
-			
+
 			while (Integer.parseInt(tmp[1]) == 1) {
-				
+
 				result = autoChangeCard(playerSet.get(player));
 				tmp = result.split(" ");
 				card = card + Integer.parseInt(tmp[0]);
 			}
-			
+
 		}
-			
+
 		playerSet.get(player).setArmy(system + continent + card);
 
 		setChanged();
 		notifyObservers(this);
 
 	}
-
 
 	/**
 	 * This method calculating the number of reinforcement armies.
@@ -400,12 +407,12 @@ public class InitializePhase extends Observable {
 	}
 
 	/**
-     * This method is used to calculate army produced by cards.
-     *
-     * @param player Name of player.
-     * @param reCards Cards player hold after change cards phase.
-     * @param change Change cards or not.
-     */
+	 * This method is used to calculate army produced by cards.
+	 *
+	 * @param player  Name of player.
+	 * @param reCards Cards player hold after change cards phase.
+	 * @param change  Change cards or not.
+	 */
 	public void cardArmy(String player, LinkedList<Card> reCards, boolean change) {
 		if (!change) {
 
@@ -504,122 +511,6 @@ public class InitializePhase extends Observable {
 	}
 
 	/**
-     * This method is to earnCard.
-     *
-     * @param player Current player.
-     */
-	public void earnCard(String player) {
-		int card = (int) (1 + Math.random() * 3);
-		Card c = new Card();
-		LinkedList<Card> list = new LinkedList<>();
-		switch (card) {
-		case 1:
-
-			// infantry
-			c.setName("i");
-			list = playerSet.get(player).getCardList();
-			list.add(c);
-			playerSet.get(player).setCardList(list);
-			JOptionPane.showMessageDialog(null, "you got infantry card");
-			break;
-		case 2:
-
-			// cavalry
-			c.setName("c");
-			list = playerSet.get(player).getCardList();
-			list.add(c);
-
-			playerSet.get(player).setCardList(list);
-			JOptionPane.showMessageDialog(null, "you got cavalry card");
-			break;
-		case 3:
-
-			// artillery
-			c.setName("a");
-			list = playerSet.get(player).getCardList();
-			list.add(c);
-
-			playerSet.get(player).setCardList(list);
-			JOptionPane.showMessageDialog(null, "you got artillery card");
-			break;
-
-		}
-
-		setChanged();
-		notifyObservers(this);
-	}
-
-	/**
-	 * The method judges these countries can transfer or not.
-	 * 
-	 * @param player The current player.
-	 * @param s The start country.
-	 * @param d The destination country.
-	 * @return true if these countries can transfer.
-	 */
-	public boolean canTransfer(String player, String s, String d) {
-		ArrayList<String> fromlist = new ArrayList<>();
-		HashMap<String, String> flagcountry = new HashMap<>();
-		flagcountry.put(s, s);
-		fromlist.add(s);
-		boolean result = findPath(player, fromlist, d,flagcountry);
-		return result;
-
-	}
-	
-	private boolean findPath(String player,ArrayList<String> from, String to,HashMap<String, String> flagcountry) {
-		boolean result = false;
-		ArrayList<String> templist = new ArrayList<>();
-		for (int i = 0; i < from.size(); i++) {
-			String[] countlist = countries.get(from.get(i)).getCountryList().split(" ");
-			for (int j = 0; j < countlist.length; j++) {
-				boolean isMatch = rightcountry(player, countlist[j]);
-				if (isMatch && countlist[j].equals(to)) {
-					return true;
-				}
-				else if (isMatch && !countlist[j].equals(to) &&  !flagcountry.containsKey(countlist[j])) {
-					templist.add(countlist[j]);
-					flagcountry.put(countlist[j], countlist[j]);
-				}
-			}
-		}
-		if (templist.size()!=0) {
-		return	findPath(player, templist, to, flagcountry);
-		}
-		else {
-			return result;
-		}
-	}
-
-
-	/**
-	 * The method checks whether current player click right country.
-	 * 
-	 * @param cplayer Current player.
-	 * @param ccountry Current country.
-	 * @return true if the player owns the country.
-	 */
-	public boolean rightcountry(String cplayer, String ccountry) {
-		boolean match = false;
-		LinkedList<Country> findCountries = playerSet.get(cplayer).getCountryList();
-		for (Iterator<Country> iterator = findCountries.iterator(); iterator.hasNext();) {
-			String s = String.valueOf(iterator.next().getName());
-			if (ccountry.equals(s)) {
-				match = true;
-			}
-
-		}
-		return match;
-	}
-
-	
-	public void doublerein(String country){
-		int army = countries.get(country).getArmy()*2;
-		countries.get(country).setArmy(army);
-		setChanged();
-	}
-
-	/**
 	 * This method implements auto changing cards.
 	 * 
 	 * @param curPlayer Current player.
@@ -678,7 +569,7 @@ public class InitializePhase extends Observable {
 			curPlayer.setChangeCardTime(curPlayer.getChangeCardTime() + 1);
 		}
 
-		String result = toString().valueOf(armies);
+		String result = String.valueOf(armies);
 
 		newlist.addAll(i);
 		newlist.addAll(a);
@@ -697,7 +588,187 @@ public class InitializePhase extends Observable {
 //		notifyObservers(this);
 		return result;
 	}
-	
+
+	/**
+	 * This method is to earnCard.
+	 *
+	 * @param player Current player.
+	 */
+	public void earnCard(String player) {
+		int card = (int) (1 + Math.random() * 3);
+		Card c = new Card();
+		LinkedList<Card> list = new LinkedList<>();
+		switch (card) {
+		case 1:
+
+			// infantry
+			c.setName("i");
+			list = playerSet.get(player).getCardList();
+			list.add(c);
+			playerSet.get(player).setCardList(list);
+			if (playerSet.get(player).getPlayerName().equals("Human")) {
+				JOptionPane.showMessageDialog(null, "you got infantry card");
+			}
+			System.out.println(player + " you got infantry card");
+			break;
+		case 2:
+
+			// cavalry
+			c.setName("c");
+			list = playerSet.get(player).getCardList();
+			list.add(c);
+
+			playerSet.get(player).setCardList(list);
+			if (playerSet.get(player).getPlayerName().equals("Human")) {
+				JOptionPane.showMessageDialog(null, "you got cavalry card");
+			}
+			System.out.println(player + " you got cavalry card");
+			break;
+		case 3:
+
+			// artillery
+			c.setName("a");
+			list = playerSet.get(player).getCardList();
+			list.add(c);
+
+			playerSet.get(player).setCardList(list);
+			if (playerSet.get(player).getPlayerName().equals("Human")) {
+				JOptionPane.showMessageDialog(null, "you got artillery card");
+			}
+			System.out.println(player + " you got artillery card");
+			break;
+
+		}
+
+		setChanged();
+		notifyObservers(this);
+	}
+
+	/**
+	 * The method judges these countries can transfer or not.
+	 * 
+	 * @param player The current player.
+	 * @param s      The start country.
+	 * @param d      The destination country.
+	 * @return true if these countries can transfer.
+	 */
+	public boolean canTransfer(String player, String s, String d) {
+		ArrayList<String> fromlist = new ArrayList<>();
+		HashMap<String, String> flagcountry = new HashMap<>();
+		flagcountry.put(s, s);
+		fromlist.add(s);
+		boolean result = findPath(player, fromlist, d, flagcountry);
+		return result;
+
+	}
+
+	private boolean findPath(String player, ArrayList<String> from, String to, HashMap<String, String> flagcountry) {
+		boolean result = false;
+		ArrayList<String> templist = new ArrayList<>();
+		for (int i = 0; i < from.size(); i++) {
+			String[] countlist = countries.get(from.get(i)).getCountryList().split(" ");
+			for (int j = 0; j < countlist.length; j++) {
+				boolean isMatch = rightcountry(player, countlist[j]);
+				if (isMatch && countlist[j].equals(to)) {
+					return true;
+				} else if (isMatch && !countlist[j].equals(to) && !flagcountry.containsKey(countlist[j])) {
+					templist.add(countlist[j]);
+					flagcountry.put(countlist[j], countlist[j]);
+				}
+			}
+		}
+		if (templist.size() != 0) {
+			return findPath(player, templist, to, flagcountry);
+		} else {
+			return result;
+		}
+	}
+
+	/**
+	 * The method checks whether current player click right country.
+	 * 
+	 * @param cplayer  Current player.
+	 * @param ccountry Current country.
+	 * @return true if the player owns the country.
+	 */
+	public boolean rightcountry(String cplayer, String ccountry) {
+		boolean match = false;
+		LinkedList<Country> findCountries = playerSet.get(cplayer).getCountryList();
+		for (Iterator<Country> iterator = findCountries.iterator(); iterator.hasNext();) {
+			String s = String.valueOf(iterator.next().getName());
+			if (ccountry.equals(s)) {
+				match = true;
+			}
+
+		}
+		return match;
+	}
+
+	public InitializePhase cheaterRein(String player, ArrayList<String> country) {
+		for (int i = 0; i < country.size(); i++) {
+			int army = countries.get(country.get(i)).getArmy() * 2;
+			countries.get(country.get(i)).setArmy(army);
+			LinkedList<Country> countrylist = playerSet.get(player).getCountryList();
+			for (int j = 0; j < countrylist.size(); j++) {
+				String couname = String.valueOf(countrylist.get(j).getName());
+				if (country.equals(couname)) {
+					countrylist.get(j).setArmy(army);
+					break;
+				}
+			}
+		}
+		return this;
+	}
+
+	public InitializePhase cheaterAttack(HashMap<String, String> occupycou) {
+		for (String key : occupycou.keySet()) {
+
+			String[] information = occupycou.get(key).split("_");
+			String attaker = information[0];
+			String defender = information[1];
+			String country = key;
+			Country c = countries.get(country);
+			c.setColor(playerSet.get(attaker).getColor());
+			LinkedList<Country> atlist = playerSet.get(attaker).getCountryList();
+			atlist.add(c);
+			playerSet.get(attaker).setCountryList(atlist);
+
+			LinkedList<Country> deList = playerSet.get(defender).getCountryList();
+			for (int j = 0; j < deList.size(); j++) {
+				if (c.getName() == deList.get(j).getName()) {
+					deList.remove(j);
+					playerSet.get(defender).setCountryList(deList);
+					break;
+				}
+			}
+
+			if (playerSet.get(defender).getCountryList().size() == 0) {
+				playerSet.remove(defender);
+			}
+
+		}
+		return this;
+	}
+
+	public InitializePhase cheaterForti(String player, int country) {
+		String cname = String.valueOf(country);
+		// update countries
+		int armies = countries.get(cname).getArmy() * 2;
+		countries.get(cname).setArmy(armies);
+
+		// update playerSet countrylist
+		LinkedList<Country> list = playerSet.get(player).getCountryList();
+		for (int i = 0; i < list.size(); i++) {
+			if (list.get(i).getName() == country) {
+				list.get(i).setArmy(armies);
+				break;
+			}
+		}
+		setChanged();
+		notifyObservers(this);
+		return this;
+	}
+
 	/**
 	 * This method modifies a signal for next turn.
 	 * 
@@ -706,15 +777,310 @@ public class InitializePhase extends Observable {
 	public void nextTurn(int signal) {
 		if (signal == 0) {
 			change = false;
-			setChanged();
-			notifyObservers(this);
-		} 
-		change = true;
+		} else {
+			change = true;
+		}
+
 		setChanged();
 		notifyObservers(this);
 	}
 
-	
+	/**
+	 * This method implements to save map.
+	 * 
+	 * @param fileName      The file path.
+	 * @param currentPlayer Current Player index like 1,2,3...
+	 * @param currentPhase  Current Phase.
+	 * @return Message of saving game.
+	 */
+	public void saveGame(String fileName, String currentPlayer, String currentPhase) { // file name = file path like
+																						// ---"/6441/world.game"
+//		if the file exists, then delete and create a new file with same name
+		String filePath = gamePath + fileName + ".game";
+		File file = new File(filePath);
+
+		if (file.exists()) {
+			file.delete();
+		}
+
+		if (continents.isEmpty() || countries.isEmpty() || playerSet.isEmpty()) {
+			Message.setSuccess(false);
+			Message.setMessage("Invalid data！");
+			return;
+
+		} else {
+		
+			String image = fileName + ".bmp";
+			String wrap = "yes";
+			String scroll = "none";
+			String author = "Soen6441_team_25-B";
+			String warn = "yes";
+
+			String header_1 = "[Game]\nimage=" + image + "\nwrap=" + wrap + "\nscroll=" + scroll + "\nauthor=" + author
+					+ "\nwarn=" + warn + "\n\n";
+			String header_2 = "[Map]\n" + filePath + "\n\n";
+			String header_3 = "[Countires]\n";
+			String header_4 = "[Players]\n";
+			String header_5 = "[CurrentPlayer]\n" + currentPlayer + "\n\n";
+			String header_6 = "[Phase]\n" + currentPhase;
+			String blankLine = "\n";
+			String comma = ",";
+
+			if (!file.exists()) {
+				try {
+					file.createNewFile();
+					FileWriter writer = new FileWriter(filePath, true);
+					writer.write(header_1);
+					writer.write(header_2);
+					writer.write(header_3);
+
+//					this is countries section, record name, color, armies;
+					for (Map.Entry<String, Country> countEntry : countries.entrySet()) {
+						writer.write(countryInfo(countEntry.getKey()));
+						writer.write(blankLine);
+					}
+
+					writer.write(blankLine);
+
+//					this is players' section;
+					writer.write(header_4);
+					for (Map.Entry<String, Player> playerEntry : playerSet.entrySet()) {
+						writer.write(playerInfo(playerEntry.getKey()));
+						writer.write(blankLine);
+					}
+
+					writer.write(blankLine);
+
+					writer.write(header_5);
+
+					if (currentPhase == "Attack") {
+						header_6 = header_6 + comma + Attack.isHasCard() + "\n";
+						writer.write(header_6);
+					} else {
+						writer.write(header_6);
+						writer.write(blankLine);
+
+					}
+
+					writer.close();
+					Message.setSuccess(true);
+					Message.setMessage("Success saving Game!");
+					return;
+
+				} catch (IOException e) {
+					e.printStackTrace();
+					Message.setSuccess(false);
+					Message.setMessage("Exist an IO exception");
+					return;
+				}
+			}
+
+		}
+		Message.setSuccess(false);
+		Message.setMessage("Never exist any data in Game file!");
+		return;
+	}
+
+	/**
+	 * This method reads a particular game file and builds a game.
+	 * 
+	 * @param filePath The specified path of the game file.
+	 * @return Message of loading game.
+	 */
+	public String loadGame(String filePath) {
+		String result = "";
+		String suffix = filePath.substring(filePath.indexOf(".") + 1, filePath.length());
+		if (!suffix.equals("game")) {
+			Message.setSuccess(false);
+			Message.setMessage("This is not a game file.");
+			return result;
+		} else {
+//			this.gamePath = filePath;
+
+			String line = "";
+			String data = "";
+
+			try {
+				BufferedReader reader = new BufferedReader(new FileReader(filePath));
+				line = reader.readLine();
+				while (line != null) {
+					data = data + line + "\n";
+					line = reader.readLine();
+				}
+				reader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			String[] dataSection = data.split("\n\n");
+			for (String str : dataSection) {
+				String[] info = str.split("\n");
+				if (!info[0].isEmpty()) {
+					switch (info[0]) {
+					case "[Game]":
+						break;
+					case "[Map]":
+						if (readMap(info)) {
+							this.continents = io.getContinents();
+							this.countries = io.getCountries();
+						} else {
+							Message.setSuccess(false);
+							Message.setMessage("Read Map file failure!!!");
+							return result;
+						}
+						break;
+					case "[Countries]":
+						countSection(info);
+						break;
+					case "[Players]":
+						playerSection(info);
+						break;
+					case "[CurrentPlayer]":
+						result = result + info[1] + " ";
+						break;
+					case "Phase":
+						String[] tmp = info[1].split(",");
+						if (tmp[0].equals("Attack") && tmp[1].equals("true")) {
+							Attack.setHasCard(true);
+						}
+						result = result + tmp[0];
+						break;
+					default:
+						break;
+					}
+				}
+			}
+		}
+		Message.setSuccess(true);
+		Message.setMessage("Loading map is succeed!");
+		setChanged();
+		notifyObservers(this);
+		return result;// the format of result is currentPlayer_phase;
+	}
+
+	/**
+	 * This method combine country's information.
+	 * 
+	 * @param name Country name.
+	 * @return All information of country.
+	 */
+	private String countryInfo(String name) {
+		Country country = this.countries.get(name);
+		String info = "";
+		info = name + ",";
+		info += String.valueOf(cList.getColors().indexOf(country.getColor())) + ",";
+		info += String.valueOf(country.getArmy());
+		return info;
+	}
+
+	/**
+	 * This method combine player's information.
+	 * 
+	 * @param index The index of player.
+	 * @return All information of player.
+	 */
+	private String playerInfo(String index) {
+		Player player = this.playerSet.get(index);
+		String info = index + ",";
+		info += player.getPlayerName() + ",";
+		info += String.valueOf(player.getArmy()) + ",";
+		info += String.valueOf(cList.getColors().indexOf(player.getColor())) + ",";
+		info += String.valueOf(player.getChangeCardTime());
+
+		for (Card card : player.getCardList()) {
+			info = "," + card.getName();
+		}
+
+		return info;
+	}
+
+	/**
+	 * This method reads map file.
+	 * 
+	 * @return true if it is succeed, otherwise false.
+	 */
+	private boolean readMap(String[] info) {
+		this.io = new IO();
+		io.readFile(info[1]);
+		return Message.isSuccess();
+	}
+
+	/**
+	 * This method reads country section.
+	 * 
+	 * @param info An array stores all countries' information.
+	 */
+	private void countSection(String[] info) {
+		for (int i = 1; i < info.length; i++) {
+			String[] str = info[i].split(",");
+			Country tmpCountry = this.countries.get(str[0]);
+			tmpCountry.setColor(this.cList.getColors().get(Integer.parseInt(str[1])));
+			tmpCountry.setArmy(Integer.parseInt(str[2]));
+		}
+	}
+
+	/**
+	 * This method reads player section.
+	 * 
+	 * @param info An array stores all players' information.
+	 */
+	private void playerSection(String[] info) {
+		this.playerSet = new HashMap<String, Player>();
+		LinkedList<Color> colors = this.cList.getColors();
+
+//		updating information;
+		for (int i = 1; i < info.length; i++) {
+			String[] str = info[i].split(",");
+			Player player = new Player(str[1]);
+			switch (info[1]) {
+			case "Human":
+				player.setStrategy(new Human());
+				break;
+			case "Aggressive":
+				player.setStrategy(new Aggressive());
+				break;
+			case "Benevolent":
+				player.setStrategy(new Benevolent());
+				break;
+			case "Random":
+				player.setStrategy(new RandomSt());
+				break;
+			case "Cheater":
+				player.setStrategy(new Cheater());
+				break;
+			default:
+				System.out.println("Get into default!!");
+				break;
+			}
+			player.setArmy(Integer.parseInt(str[2]));
+			player.setColor(colors.get(Integer.parseInt(str[3])));
+			player.setChangeCardTime(Integer.parseInt(str[4]));
+			this.playerSet.put(str[0], player);
+
+//			updating card list
+			if (str.length > 5) {
+				LinkedList<Card> cLinkedList = new LinkedList<Card>();
+				for (int j = 5; j < str.length; j++) {
+					cLinkedList.add(new Card(str[j]));
+				}
+				player.setCardList(cLinkedList);
+			}
+		}
+
+//		updating country list;
+		for (Map.Entry<String, Player> pEntry : this.playerSet.entrySet()) {
+			LinkedList<Country> cLinkedList = new LinkedList<Country>();
+			for (Map.Entry<String, Country> cEntry : this.countries.entrySet()) {
+				Color pColor = pEntry.getValue().getColor();
+				Color cColor = cEntry.getValue().getColor();
+				if (pColor.equals(cColor)) {
+					cLinkedList.add(cEntry.getValue());
+				}
+			}
+			pEntry.getValue().setCountryList(cLinkedList);
+		}
+
+	}
 }
 
 /**
