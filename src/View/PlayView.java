@@ -8,6 +8,8 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -38,6 +40,7 @@ import javax.xml.crypto.dsig.keyinfo.PGPData;
 import Model.Attack;
 import Model.Continent;
 import Model.Country;
+import Model.IO;
 import Model.InitializePhase;
 import Model.Line;
 import Model.Player;
@@ -53,15 +56,16 @@ import Strategy.Human;
  */
 public class PlayView extends JFrame implements Observer {
 
-	public HashMap<String, Line> lineMap = new HashMap<>();
+	private HashMap<String, Line> lineMap = new HashMap<>();
 	public HashMap<String, Country> countries = new HashMap<>();
 	public HashMap<String, Continent> continents = new HashMap<>();
 	public HashMap<String, Player> playerSet = new HashMap<>();
+	public static String mappath;
 	public static JLabel name = new JLabel();
 	public static JLabel color;
 	public static JLabel armies;
 	public static String currentPhase;
-	public static JButton phase;
+	public static JButton phase = new JButton();
 	public static boolean WIN = false;
 	public ArrayList<JLabel> labellist = new ArrayList<>();
 	BackEnd b;
@@ -128,7 +132,6 @@ public class PlayView extends JFrame implements Observer {
 						| UnsupportedLookAndFeelException ex) {
 					ex.printStackTrace();
 				}
-				System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@");
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//		PlayPane playPane = new PlayPane();
 				frame.add( new PlayPane(), BorderLayout.WEST);
@@ -223,6 +226,7 @@ public class PlayView extends JFrame implements Observer {
 				String continent = countries.get(key).getContinent() + " " + countries.get(key).getArmy();
 
 				String countryList = countries.get(key).getCountryList();
+				
 				countries.get(key).setCountryList(countryList + " ");
 				String[] link = countryList.split(" ");
 				try {
@@ -270,8 +274,8 @@ public class PlayView extends JFrame implements Observer {
 			repaint();
 
 			// create button country
-			phase = new JButton("start up phase");
-			currentPhase = "start up";
+//			phase = new JButton("start up phase");
+//			currentPhase = "start up";
 			phase.setName("phase");
 			phase.setBackground(Color.green);
 			phase.setBounds(400, 600, 200, 50);
@@ -308,9 +312,30 @@ public class PlayView extends JFrame implements Observer {
 			armies.setBounds(1100, 70, 80, 25);
 			add(armies);
 			
+			
+			JButton save = new JButton("save");
+			save.setBounds(1000, 500, 80, 25);
+			add(save);
+			save.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					String fileName = JOptionPane.showInputDialog("save map?");
+					if (fileName != null) {
+						String[] currentplayer = name.getText().split("_");
+					//	observable.saveGame(fileName, currentPlayer, n);
+						observable.saveGame(fileName,mappath,currentplayer[1] , currentPhase);
+						System.out.println(fileName);
+						JOptionPane.showMessageDialog(null, "save map successful");
+
+						frame.dispose();
+						new StartGame();
+					} 
+				
+				}
+			});
 			//判断是否为Human
 			if (!playerSet.get(lastname).getPlayerName().equals("Human")) {
-				System.out.println("############");
 				startupPlayer("1");
 			}
 
@@ -353,7 +378,7 @@ public class PlayView extends JFrame implements Observer {
 				// get into reinforcement phase
 				if (playerSet.get("1").getPlayerName().equals("Human")) {
 					//next player 为 human
-					System.out.println("@@enter reinforcement phase");
+					System.out.println("enter reinforcement phase");
 					phase.setText("Reinforcement");
 					currentPhase = "Reinforcement";
 					observable.Reinforcement("1");
@@ -367,7 +392,7 @@ public class PlayView extends JFrame implements Observer {
 					//next player 非 human
 				//	reinforcement("1");
 					
-					System.out.println("@@enter reinforcement phase");
+					System.out.println("enter reinforcement phase");
 					phase.setText("Reinforcement");
 					currentPhase = "Reinforcement";
 					observable.Reinforcement("1");
@@ -554,6 +579,7 @@ public class PlayView extends JFrame implements Observer {
 
 						JLabel c = (JLabel) e.getComponent();
 						String[] fullname = name.getText().split("_");
+					//	System.out.println(playerSet.get("1").getStrategy());
 						playerSet.get(fullname[1]).reinforcement(c, click, observable, b);
 					//	human.reinforcement(c,click, observable ,b);
 					

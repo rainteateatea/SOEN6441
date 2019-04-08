@@ -66,6 +66,9 @@ public class InitGame_controller extends Object {
 			playerSet = pharseModel.getPlayerSet();
 			String fullname = playerSet.get("1").getPlayerName()+"_"+"1";
 			PlayView.name.setText(fullname);
+			PlayView.phase.setText("start up phase");
+			PlayView.currentPhase = "start up";
+			PlayView.mappath = filePath;
 			
 		} else {
 			String error = Message.getMessage();
@@ -73,5 +76,32 @@ public class InitGame_controller extends Object {
 			new InitGame();
 		}
 
+	}
+	
+	public void continueGame(String filename) {
+		String result = pharseModel.loadGame(filename);
+		System.out.println(result);
+		
+		PlayView p = new PlayView();
+		p.countries = pharseModel.getCountries();
+		p.continents = pharseModel.getContinents();
+		p.playerSet = pharseModel.getPlayerSet();
+	
+		String[] information = result.split(" ");
+		PlayView.mappath = information[0].split("/")[1];
+		String fullname = p.playerSet.get(information[1]).getPlayerName()+"_"+information[1];
+		PlayView.name.setText(fullname);
+		if (information.length == 3) {
+			PlayView.phase.setText(information[2]);
+			PlayView.currentPhase = information[2];
+		}
+		else {
+//			PlayView.phase.setText(information[2]+" "+information[3]);
+//			PlayView.currentPhase =information[3]+" "+information[3];
+			PlayView.phase.setText("start up phase");
+			PlayView.currentPhase = "start up";
+		}
+
+		
 	}
 }

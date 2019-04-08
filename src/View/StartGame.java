@@ -74,11 +74,30 @@ public class StartGame extends JFrame{
 		add(play);
 		play.setBounds(200, 200, 200, 100);
 		
+		
+		
 		JButton	Edit = new JButton("Edit Map");
 		add(Edit);
 		Edit.setBounds(200, 300, 200, 100);
 		Edit.setVisible(true);
 	
+		JButton tournament = new JButton("Tournament Mode");
+		add(tournament);
+		tournament.setBounds(200, 400, 200, 100);
+		tournament.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				frame.dispose();
+				new Tournament();
+				System.out.println("Tournament Mode");
+				
+			}
+		});
+		
+		
+		
+		
 		play.addActionListener(new ActionListener() {
 			
 			/**

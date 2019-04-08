@@ -207,6 +207,44 @@ public class InitGame extends JFrame {
 
 				}
 			});
+			
+			
+			
+			JButton conti = new JButton("Continue Game");
+			conti.setBounds(200, 400, 200, 100);
+			add(conti);
+			conti.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+
+					JFileChooser jfc = new JFileChooser();
+					jfc.setCurrentDirectory(new File("LoadGame/"));
+					jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+
+					int returnValue = jfc.showOpenDialog(null);
+
+					if (returnValue == JFileChooser.APPROVE_OPTION) {
+						System.out.println("File name:" + jfc.getSelectedFile().getName());
+						String filename = "LoadGame/" + jfc.getSelectedFile().getName();
+
+						
+						
+						
+						
+
+								frame.dispose();
+								InitGame_controller controller = new InitGame_controller();
+								
+								controller.continueGame(filename);
+							}
+
+
+					
+
+				}
+			});
+			
 
 		}
 

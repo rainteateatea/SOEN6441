@@ -11,7 +11,22 @@ package Model;
 public class Card {
 
 	String name;
-
+	
+	/**
+	 * This method is non-argument constructor.
+	 */
+	public Card() {
+		
+	}
+	
+	/**
+	 * This method is card constructor.
+	 * 
+	 * @param name Card name.
+	 */
+	public Card(String name) {
+		this.name = name;
+	}
 	/**
 	 * This method obtains card name.
 	 * 

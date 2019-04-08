@@ -1,6 +1,11 @@
 package Model;
 
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 import javax.swing.JLabel;
@@ -43,7 +48,11 @@ public class InitializePhase extends Observable {
 	private static int playtime = 1;
 	private static ArrayList<String> winnerlist = new ArrayList<>();
 	public static boolean TournamentMode = false;
+	private IO fileio;
+	
 
+	
+	public String gamePath = "LoadGame/";
 	public int getDturns() {
 		return Dturns;
 	}
@@ -929,6 +938,307 @@ public class InitializePhase extends Observable {
 		
 		setChanged();
 		notifyObservers(this);
+
+	}
+	
+	/**
+	 * This method implements to save map.
+	 * 
+	 * @param fileName      The file path.
+	 * @param currentPlayer Current Player index like 1,2,3...
+	 * @param currentPhase  Current Phase.
+	 * @return Message of saving game.
+	 */
+	public void saveGame(String fileName,String mapPath, String currentPlayer, String currentPhase) { // file name = file path like
+																						// ---"/6441/world.game"
+//		if the file exists, then delete and create a new file with same name
+		String filePath = gamePath + fileName + ".game";
+		File file = new File(filePath);
+
+		if (file.exists()) {
+			file.delete();
+		}
+
+		if (continents.isEmpty() || countries.isEmpty() || playerSet.isEmpty()) {
+			Message.setSuccess(false);
+			Message.setMessage("Invalid data！");
+			return;
+
+		} else {
+		
+			String image = fileName + ".bmp";
+			String wrap = "yes";
+			String scroll = "none";
+			String author = "Soen6441_team_25-B";
+			String warn = "yes";
+
+			String header_1 = "[Game]\nimage=" + image + "\nwrap=" + wrap + "\nscroll=" + scroll + "\nauthor=" + author
+					+ "\nwarn=" + warn + "\n\n";
+			String header_2 = "[Map]\n" + mapPath + "\n\n";
+			String header_3 = "[Countries]\n";
+			String header_4 = "[Players]\n";
+			String header_5 = "[CurrentPlayer]\n" + currentPlayer + "\n\n";
+			String header_6 = "[Phase]\n" + currentPhase;
+			String blankLine = "\n";
+			String comma = ",";
+
+			if (!file.exists()) {
+				try {
+					file.createNewFile();
+					FileWriter writer = new FileWriter(filePath, true);
+					writer.write(header_1);
+					writer.write(header_2);
+					writer.write(header_3);
+
+//					this is countries section, record name, color, armies;
+					for (Map.Entry<String, Country> countEntry : countries.entrySet()) {
+						writer.write(countryInfo(countEntry.getKey()));
+						writer.write(blankLine);
+					}
+
+					writer.write(blankLine);
+
+//					this is players' section;
+					writer.write(header_4);
+					for (Map.Entry<String, Player> playerEntry : playerSet.entrySet()) {
+						writer.write(playerInfo(playerEntry.getKey()));
+						writer.write(blankLine);
+					}
+
+					writer.write(blankLine);
+
+					writer.write(header_5);
+
+					if (currentPhase == "Attack") {
+						header_6 = header_6 + comma + Attack.isHasCard() + "\n";
+						writer.write(header_6);
+					} else {
+						writer.write(header_6);
+						writer.write(blankLine);
+
+					}
+
+					writer.close();
+					Message.setSuccess(true);
+					Message.setMessage("Success saving Game!");
+					return;
+
+				} catch (IOException e) {
+					e.printStackTrace();
+					Message.setSuccess(false);
+					Message.setMessage("Exist an IO exception");
+					return;
+				}
+			}
+
+		}
+		Message.setSuccess(false);
+		Message.setMessage("Never exist any data in Game file!");
+		return;
+	}
+	
+	/**
+	 * This method reads a particular game file and builds a game.
+	 * 
+	 * @param filePath The specified path of the game file.
+	 * @return Message of loading game.
+	 */
+	public String loadGame(String filePath) {
+		
+		String result = "";
+		String suffix = filePath.substring(filePath.indexOf(".") + 1, filePath.length());
+		if (!suffix.equals("game")) {
+			Message.setSuccess(false);
+			Message.setMessage("This is not a game file.");
+			return result;
+		} else {
+//			this.gamePath = filePath;
+
+			String line = "";
+			String data = "";
+
+			try {
+				BufferedReader reader = new BufferedReader(new FileReader(filePath));
+				line = reader.readLine();
+				while (line != null) {
+					data = data + line + "\n";
+					line = reader.readLine();
+			//		System.out.println(line);
+				}
+				reader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			String[] dataSection = data.split("\n\n");
+			for (String str : dataSection) {
+				String[] info = str.split("\n");
+				if (!info[0].isEmpty()) {
+					switch (info[0]) {
+					case "[Game]":
+						break;
+					case "[Map]":
+						if (readMap(info)) {
+							result = result + info[1] + " ";
+							this.continents = fileio.getContinents();
+							this.countries = fileio.getCountries();
+						} else {
+							Message.setSuccess(false);
+							Message.setMessage("Read Map file failure!!!");
+							return result;
+						}
+						break;
+					case "[Countries]":
+						countSection(info);
+						break;
+					case "[Players]":
+						playerSection(info);
+						break;
+					case "[CurrentPlayer]":
+						result = result + info[1] + " ";
+						break;
+					case "[Phase]":
+						String[] tmp = info[1].split(",");
+						if (tmp[0].equals("Attack") && tmp[1].equals("true")) {
+							Attack.setHasCard(true);
+						}
+						result = result + tmp[0];
+						break;
+					default:
+						break;
+					}
+				}
+			}
+		}
+		Message.setSuccess(true);
+		Message.setMessage("Loading map is succeed!");
+		System.out.println("Loading map is succeed!"+result);
+		setChanged();
+		notifyObservers(this);
+		return result;// the format of result is currentPlayer_phase;
+	}
+
+	/**
+	 * This method combine country's information.
+	 * 
+	 * @param name Country name.
+	 * @return All information of country.
+	 */
+	private String countryInfo(String name) {
+		Country country = this.countries.get(name);
+		String info = "";
+		info = name + ",";
+		info += String.valueOf(cList.getColors().indexOf(country.getColor())) + ",";
+		info += String.valueOf(country.getArmy());
+		return info;
+	}
+
+	/**
+	 * This method combine player's information.
+	 * 
+	 * @param index The index of player.
+	 * @return All information of player.
+	 */
+	private String playerInfo(String index) {
+		Player player = this.playerSet.get(index);
+		String info = index + ",";
+		info += player.getPlayerName() + ",";
+		info += String.valueOf(player.getArmy()) + ",";
+		info += String.valueOf(cList.getColors().indexOf(player.getColor())) + ",";
+		info += String.valueOf(player.getChangeCardTime());
+
+		for (Card card : player.getCardList()) {
+			info = "," + card.getName();
+		}
+
+		return info;
+	}
+
+	/**
+	 * This method reads map file.
+	 * 
+	 * @return true if it is succeed, otherwise false.
+	 */
+	private boolean readMap(String[] info) {
+		this.fileio = new IO();
+		fileio.readFile(info[1]);
+		return Message.isSuccess();
+	}
+
+	/**
+	 * This method reads country section.
+	 * 
+	 * @param info An array stores all countries' information.
+	 */
+	private void countSection(String[] info) {
+		for (int i = 1; i < info.length; i++) {
+			String[] str = info[i].split(",");
+			Country tmpCountry = this.countries.get(str[0]);
+			tmpCountry.setColor(this.cList.getColors().get(Integer.parseInt(str[1])));
+			tmpCountry.setArmy(Integer.parseInt(str[2]));
+		}
+	}
+
+	/**
+	 * This method reads player section.
+	 * 
+	 * @param info An array stores all players' information.
+	 */
+	private void playerSection(String[] info) {
+		this.playerSet = new HashMap<String, Player>();
+		LinkedList<Color> colors = this.cList.getColors();
+
+//		updating information;
+		for (int i = 1; i < info.length; i++) {
+			String[] str = info[i].split(",");
+			Player player = new Player(str[1]);
+			switch (str[1]) {
+			case "Human":
+				player.setStrategy(new Human());
+				break;
+			case "Aggressive":
+				player.setStrategy(new Aggressive());
+				break;
+			case "Benevolent":
+				player.setStrategy(new Benevolent());
+				break;
+			case "Random":
+				player.setStrategy(new RandomSt());
+				break;
+			case "Cheater":
+				player.setStrategy(new Cheater());
+				break;
+			default:
+				System.out.println("Get into default!!");
+				break;
+			}
+			player.setArmy(Integer.parseInt(str[2]));
+			player.setColor(colors.get(Integer.parseInt(str[3])));
+			player.setChangeCardTime(Integer.parseInt(str[4]));
+			this.playerSet.put(str[0], player);
+
+//			updating card list
+			if (str.length > 5) {
+				LinkedList<Card> cLinkedList = new LinkedList<Card>();
+				for (int j = 5; j < str.length; j++) {
+					cLinkedList.add(new Card(str[j]));
+				}
+				player.setCardList(cLinkedList);
+			}
+		}
+
+//		updating country list;
+		for (Map.Entry<String, Player> pEntry : this.playerSet.entrySet()) {
+			LinkedList<Country> cLinkedList = new LinkedList<Country>();
+			for (Map.Entry<String, Country> cEntry : this.countries.entrySet()) {
+				Color pColor = pEntry.getValue().getColor();
+				Color cColor = cEntry.getValue().getColor();
+				if (pColor.equals(cColor)) {
+					cLinkedList.add(cEntry.getValue());
+				}
+			}
+			pEntry.getValue().setCountryList(cLinkedList);
+		}
 
 	}
 
