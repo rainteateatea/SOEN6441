@@ -88,7 +88,7 @@ public class InitGame_controller extends Object {
 		p.playerSet = pharseModel.getPlayerSet();
 	
 		String[] information = result.split(" ");
-		PlayView.mappath = information[0].split("/")[1];
+		PlayView.mappath = information[0];
 		String fullname = p.playerSet.get(information[1]).getPlayerName()+"_"+information[1];
 		PlayView.name.setText(fullname);
 		if (information.length == 3) {
