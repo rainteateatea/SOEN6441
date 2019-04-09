@@ -7,7 +7,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
-import javax.imageio.IIOException;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import Strategy.Aggressive;
@@ -15,10 +14,18 @@ import Strategy.Benevolent;
 import Strategy.Cheater;
 import Strategy.Human;
 import Strategy.RandomSt;
+import Strategy.TourAggressive;
+import Strategy.TourBenevolent;
+import Strategy.TourCheater;
+import Strategy.TourRandom;
 import View.CardView;
+import View.PlayView;
+import View.TourMode;
 
 /**
- * <h1>InitializePhase</h1> This is an initialized phase class.
+ * <h1>InitializePhase</h1>
+ * 
+ * This is an initialized phase class.
  * 
  * @author jiamin_he chenwei_song
  * @version 3.0
@@ -29,11 +36,19 @@ public class InitializePhase extends Observable {
 	private HashMap<String, Player> playerSet;
 	private HashMap<String, Country> countries;
 	private HashMap<String, Continent> continents;
-	private ArrayList<String> playerType = new ArrayList<String>();
+	private static ArrayList<String> playerType = new ArrayList<String>();
 	private ColorList cList = new ColorList();
 	public boolean change = false;
-	private IO io;
-	public String gamePath = "mapfile/";
+	private int Dturns = 0;;
+	public static int D;
+	public static int G;
+	public static ArrayList<String> maps = new ArrayList<>();
+	private static ArrayList<String> printmaps = new ArrayList<>();
+	private static int playtime = 1;
+	public static ArrayList<String> winnerlist = new ArrayList<>();
+	public static boolean TournamentMode = false;
+	private IO fileio;
+	public String gamePath = "LoadGame/";
 
 	/**
 	 * This is a constructor of initializePhase.
@@ -108,11 +123,30 @@ public class InitializePhase extends Observable {
 	}
 
 	/**
+	 * The method obtains the number of game turns.
+	 * 
+	 * @return The number of game turns.
+	 */
+	public int getDturns() {
+		return Dturns;
+	}
+
+	/**
+	 * This method modifies the number of game turns.
+	 * 
+	 * @param dturns The number of game turns.
+	 */
+	public void setDturns(int dturns) {
+		Dturns = dturns;
+	}
+
+	/**
 	 * This method adding data to playerNum, countries, continents.
 	 *
 	 * @param playerNum  The number of players.
 	 * @param countries  A hash map storing all countries which are in the map.
 	 * @param continents A hash map storing all continents which are in the map.
+	 * @param playlist The type of players.
 	 */
 	public void addData(int playerNum, ArrayList<String> playlist, HashMap<String, Country> countries,
 			HashMap<String, Continent> continents) {
@@ -123,13 +157,129 @@ public class InitializePhase extends Observable {
 	}
 
 	/**
-	 * This method invokes judgePlayerNum(), initializePlayerSet(),
-	 * initializePlayerSet(), initializeCountries() to implement game's initializing
-	 * phase.
+	 * This method obtains a map stores all game maps.
+	 * 
+	 * @param mapList A list stores all game maps.
 	 */
-	public void initPhase() {
+	public void receivemap(ArrayList<String> mapList) {
+		printmaps = (ArrayList<String>) mapList.clone();
+	}
+
+	/**
+	 * This method receives all data information of tournament mode.
+	 * 
+	 * @param mapList    A list stores all game maps.
+	 * @param playerList A list stores all player types.
+	 * @param times      The number of the map will be played.
+	 * @param turns      The number of game turns.
+	 */
+	public void receive(ArrayList<String> mapList, ArrayList<String> playerList, String times, int turns) {
+		HashMap<String, Player> pl = new HashMap<>();
+		HashMap<String, Country> cou = new HashMap<>();
+		HashMap<String, Continent> con = new HashMap<>();
+		setCountries(cou);
+		setContinents(con);
+		setPlayerSet(pl);
+		TournamentMode = true;
+		G = Integer.valueOf(times);
+		D = turns;
+		maps = (ArrayList<String>) mapList.clone();
+		System.out.println(maps.size());
+		addturn();
+		IO io = new IO();
+		String filename = "mapfile/" + maps.get(0);
+		io.readFile(filename);
+		addData(playerList.size(), playerList, io.getCountries(), io.getContinents());
+		initPhase(true);
+
+		TourMode tourmode = new TourMode(getCountries(), getContinents(), getPlayerSet());
+		this.addObserver(tourmode);
+
+	}
+
+	/**
+	 * This method increases the turns.
+	 */
+	public void addturn() {
+		int nowturn = getDturns();
+		System.out.println("Turn  " + nowturn);
+
+		setDturns(nowturn + 1);
+	}
+
+	/**
+	 * This method refreshes game information.
+	 * 
+	 * @param player The current winner.
+	 */
+	public void refreshgame(String player) {
+		if (playtime < G) {
+			setDturns(0);
+			playtime++;
+			winnerlist.add(player);
+			receive(maps, playerType, String.valueOf(G), D);
+		} else {
+
+			// change map
+			System.out.println("change map");
+			winnerlist.add(player);
+			refreshmap();
+		}
+
+	}
+
+	/**
+	 * This method implements changing game map.
+	 */
+	public void refreshmap() {
+		maps.remove(0);
+		if (maps.size() != 0) {
+			setDturns(0);
+			playtime = 0;
+			receive(maps, playerType, String.valueOf(G), D);
+		} else {
+
+			// print result
+			System.out.println("print all result");
+			System.out.print("M: ");
+			for (int i = 0; i < printmaps.size(); i++) {
+				System.out.print(printmaps.get(i) + " ");
+			}
+			System.out.println();
+			System.out.print("P: ");
+			for (int i = 0; i < playerType.size(); i++) {
+				System.out.print(playerType.get(i) + " ");
+			}
+			System.out.println();
+			System.out.println("G: " + G);
+			System.out.println("D: " + D);
+			int n = 0;
+			for (int i = 0; i < printmaps.size(); i++) {
+				System.out.print(printmaps.get(i) + " ");
+				for (int j = 0; j < G; j++) {
+					System.out.print(winnerlist.get(n) + " ");
+					n++;
+				}
+				System.out.println();
+			}
+		}
+
+	}
+
+	/**
+	 * This method judge which game mode user choose.
+	 * 
+	 * @param Mode The name of mode.
+	 */
+	public void initPhase(boolean Mode) {
 		boolean judgeNum = judgePlayerNum();
-		boolean initPlatyer = initializePlayerSet();
+		boolean initPlatyer;
+		if (Mode) {
+			initPlatyer = initialTourPlayerSet();
+		} else {
+			initPlatyer = initializePlayerSet();
+		}
+
 		boolean initAmry = initializeArmy();
 		boolean initCount = initializeCountries();
 
@@ -162,6 +312,51 @@ public class InitializePhase extends Observable {
 
 			System.out.println("Get into initialized phase.");
 			return true;
+		}
+
+	}
+
+	/**
+	 * The method initializes tournament mode.
+	 * 
+	 * @return true if initializes succeed, otherwise false.
+	 */
+	private boolean initialTourPlayerSet() {
+
+		LinkedList<Color> colorLinkedList = cList.getColors();
+		for (int i = 1; i <= playerNum; i++) {
+			String playName = this.playerType.get(i - 1);
+			Player player = new Player(playName);
+
+			// set player strategy
+			switch (playName) {
+			case "Aggressive":
+				player.setStrategy(new TourAggressive());
+				break;
+			case "Benevolent":
+				player.setStrategy(new TourBenevolent());
+				break;
+			case "Random":
+				player.setStrategy(new TourRandom());
+				break;
+			case "Cheater":
+				player.setStrategy(new TourCheater());
+				break;
+			default:
+				System.out.println("Get into default!!");
+				break;
+			}
+
+			player.setColor(colorLinkedList.get(i - 1));// set player color
+			playerSet.put(String.valueOf(i), player);// add player to playerSet; key is "1,2,3..."
+		}
+
+		if (playerSet.size() == playerNum) {
+			System.out.println("InitializePlayerSet success");
+			return true;
+		} else {
+			System.out.println("InitializePlayerSet Failure");
+			return false;
 		}
 
 	}
@@ -223,7 +418,7 @@ public class InitializePhase extends Observable {
 			armyDefault = 40;
 			break;
 		case 3:
-			armyDefault = 35;
+			armyDefault = 15;
 			break;
 		case 4:
 			armyDefault = 30;
@@ -334,7 +529,7 @@ public class InitializePhase extends Observable {
 		int system = SystemArmy(player);
 		int continent = ContinentArmy(player);
 		int card = 0;
-		if (!playerSet.get(player).equals("Human")) {
+		if (!playerSet.get(player).getPlayerName().equals("Human")) {
 
 			String result = autoChangeCard(playerSet.get(player));
 			String[] tmp = result.split(" ");
@@ -578,14 +773,10 @@ public class InitializePhase extends Observable {
 
 		if (i.size() >= 3 || a.size() >= 3 || c.size() >= 3 || (i.size() != 0 && a.size() != 0 && c.size() != 0)) {
 			result = result + " " + "1";
-//			setsChanged();
-//			notifyObservers(this);
 			return result;
 		}
 
 		result = result + " " + "0";
-//		setChanged();
-//		notifyObservers(this);
 		return result;
 	}
 
@@ -662,6 +853,15 @@ public class InitializePhase extends Observable {
 
 	}
 
+	/**
+	 * The method implements finding a path between two countries.
+	 * 
+	 * @param player      Current player.
+	 * @param from        The start country name.
+	 * @param to          The end country name.
+	 * @param flagcountry All countries.
+	 * @return true if finds a path succeed, otherwise false
+	 */
 	private boolean findPath(String player, ArrayList<String> from, String to, HashMap<String, String> flagcountry) {
 		boolean result = false;
 		ArrayList<String> templist = new ArrayList<>();
@@ -704,6 +904,13 @@ public class InitializePhase extends Observable {
 		return match;
 	}
 
+	/**
+	 * This method implements cheater's reinforcement phase.
+	 * 
+	 * @param player  Current player.
+	 * @param country The country will be reinforced.
+	 * @return Current status.
+	 */
 	public InitializePhase cheaterRein(String player, ArrayList<String> country) {
 		for (int i = 0; i < country.size(); i++) {
 			int army = countries.get(country.get(i)).getArmy() * 2;
@@ -717,9 +924,16 @@ public class InitializePhase extends Observable {
 				}
 			}
 		}
+
 		return this;
 	}
 
+	/**
+	 * This method implements cheater's attack phase.
+	 * 
+	 * @param occupycou Message of attack phase.
+	 * @return Current status.
+	 */
 	public InitializePhase cheaterAttack(HashMap<String, String> occupycou) {
 		for (String key : occupycou.keySet()) {
 
@@ -750,13 +964,21 @@ public class InitializePhase extends Observable {
 		return this;
 	}
 
+	/**
+	 * This method implements cheater's fortification.
+	 * 
+	 * @param player  Current player.
+	 * @param country Current country.
+	 * @return Current status.
+	 */
 	public InitializePhase cheaterForti(String player, int country) {
 		String cname = String.valueOf(country);
+
 		// update countries
 		int armies = countries.get(cname).getArmy() * 2;
 		countries.get(cname).setArmy(armies);
 
-		// update playerSet countrylist
+		// update playerSet country list
 		LinkedList<Country> list = playerSet.get(player).getCountryList();
 		for (int i = 0; i < list.size(); i++) {
 			if (list.get(i).getName() == country) {
@@ -780,21 +1002,21 @@ public class InitializePhase extends Observable {
 		} else {
 			change = true;
 		}
-
 		setChanged();
 		notifyObservers(this);
+
 	}
 
 	/**
 	 * This method implements to save map.
 	 * 
 	 * @param fileName      The file path.
+	 * @param mapPath 		Map path.
 	 * @param currentPlayer Current Player index like 1,2,3...
 	 * @param currentPhase  Current Phase.
-	 * @return Message of saving game.
 	 */
-	public void saveGame(String fileName, String currentPlayer, String currentPhase) { // file name = file path like
-																						// ---"/6441/world.game"
+	public void saveGame(String fileName, String mapPath, String currentPlayer, String currentPhase) {
+
 //		if the file exists, then delete and create a new file with same name
 		String filePath = gamePath + fileName + ".game";
 		File file = new File(filePath);
@@ -809,7 +1031,7 @@ public class InitializePhase extends Observable {
 			return;
 
 		} else {
-		
+
 			String image = fileName + ".bmp";
 			String wrap = "yes";
 			String scroll = "none";
@@ -818,8 +1040,8 @@ public class InitializePhase extends Observable {
 
 			String header_1 = "[Game]\nimage=" + image + "\nwrap=" + wrap + "\nscroll=" + scroll + "\nauthor=" + author
 					+ "\nwarn=" + warn + "\n\n";
-			String header_2 = "[Map]\n" + filePath + "\n\n";
-			String header_3 = "[Countires]\n";
+			String header_2 = "[Map]\n" + mapPath + "\n\n";
+			String header_3 = "[Countries]\n";
 			String header_4 = "[Players]\n";
 			String header_5 = "[CurrentPlayer]\n" + currentPlayer + "\n\n";
 			String header_6 = "[Phase]\n" + currentPhase;
@@ -888,6 +1110,7 @@ public class InitializePhase extends Observable {
 	 * @return Message of loading game.
 	 */
 	public String loadGame(String filePath) {
+
 		String result = "";
 		String suffix = filePath.substring(filePath.indexOf(".") + 1, filePath.length());
 		if (!suffix.equals("game")) {
@@ -895,7 +1118,6 @@ public class InitializePhase extends Observable {
 			Message.setMessage("This is not a game file.");
 			return result;
 		} else {
-//			this.gamePath = filePath;
 
 			String line = "";
 			String data = "";
@@ -906,6 +1128,7 @@ public class InitializePhase extends Observable {
 				while (line != null) {
 					data = data + line + "\n";
 					line = reader.readLine();
+					// System.out.println(line);
 				}
 				reader.close();
 			} catch (IOException e) {
@@ -921,8 +1144,9 @@ public class InitializePhase extends Observable {
 						break;
 					case "[Map]":
 						if (readMap(info)) {
-							this.continents = io.getContinents();
-							this.countries = io.getCountries();
+							result = result + info[1] + " ";
+							this.continents = fileio.getContinents();
+							this.countries = fileio.getCountries();
 						} else {
 							Message.setSuccess(false);
 							Message.setMessage("Read Map file failure!!!");
@@ -938,7 +1162,7 @@ public class InitializePhase extends Observable {
 					case "[CurrentPlayer]":
 						result = result + info[1] + " ";
 						break;
-					case "Phase":
+					case "[Phase]":
 						String[] tmp = info[1].split(",");
 						if (tmp[0].equals("Attack") && tmp[1].equals("true")) {
 							Attack.setHasCard(true);
@@ -953,6 +1177,7 @@ public class InitializePhase extends Observable {
 		}
 		Message.setSuccess(true);
 		Message.setMessage("Loading map is succeed!");
+		System.out.println("Loading map is succeed!" + result);
 		setChanged();
 		notifyObservers(this);
 		return result;// the format of result is currentPlayer_phase;
@@ -988,7 +1213,7 @@ public class InitializePhase extends Observable {
 		info += String.valueOf(player.getChangeCardTime());
 
 		for (Card card : player.getCardList()) {
-			info = "," + card.getName();
+			info += info + "," + card.getName();
 		}
 
 		return info;
@@ -1000,8 +1225,8 @@ public class InitializePhase extends Observable {
 	 * @return true if it is succeed, otherwise false.
 	 */
 	private boolean readMap(String[] info) {
-		this.io = new IO();
-		io.readFile(info[1]);
+		this.fileio = new IO();
+		fileio.readFile(info[1]);
 		return Message.isSuccess();
 	}
 
@@ -1032,7 +1257,7 @@ public class InitializePhase extends Observable {
 		for (int i = 1; i < info.length; i++) {
 			String[] str = info[i].split(",");
 			Player player = new Player(str[1]);
-			switch (info[1]) {
+			switch (str[1]) {
 			case "Human":
 				player.setStrategy(new Human());
 				break;
@@ -1081,11 +1306,13 @@ public class InitializePhase extends Observable {
 		}
 
 	}
+
 }
 
 /**
- * <h1>ColorList</h1> This class defines color class, initialing all color
- * information.
+ * <h1>ColorList</h1>
+ * 
+ * This class defines color class, initialing all color information.
  *
  * @author jiamin_he
  * @version 3.0
