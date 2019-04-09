@@ -8,7 +8,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		TestCheckmap4.class, TestCheckmap5.class, TestCheckmap6.class,
 		TestIO.class, TestPlayGame.class ,TestAttack.class, TestCardView1.class,TestCardView2.class
 		,TestCardView3.class,TestCardView4.class,TestCardView5.class,TestCardView6.class
-		,TestCardView7.class})
+		,TestCardView7.class,Testtournament.class,TestSaveGame.class,TestLoadGame.class})
 public class AllTests {
 
 }
